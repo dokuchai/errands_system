@@ -5,5 +5,5 @@ from users.views import CustomUserTokenCreateOrRefresh
 urlpatterns = [
     path('signin/', CustomUserTokenCreateOrRefresh.as_view()),
     path('admin/', admin.site.urls),
-    path('errands/', include('errands.urls')),
+    path('', include('errands.urls')),
 ]

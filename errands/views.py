@@ -21,3 +21,6 @@ class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()
     serializer_class = TaskListSerializer
     permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(board_id=self.kwargs['pk'])

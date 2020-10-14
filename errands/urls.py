@@ -4,5 +4,5 @@ from .views import BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateVi
 urlpatterns = [
     path('board/<int:pk>/', BoardRetrieveUpdateView.as_view()),
     path('task/<int:pk>/', TaskRetrieveUpdateView.as_view()),
-    path('create-task/', TaskCreateView.as_view()),
+    path('board/<int:pk>/create-task/', TaskCreateView.as_view()),
 ]

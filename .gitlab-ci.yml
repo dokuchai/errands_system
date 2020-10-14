@@ -8,4 +8,8 @@ deploy:
     - srv2363
   script:
     - rsync -r ./ /home/uizo/shady/errands_system
+
+job:
+  stage: deploy
+  scriptt:
     - sudo supervisorctl restart errands_system

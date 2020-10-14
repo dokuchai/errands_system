@@ -11,5 +11,5 @@ deploy:
 
 job:
   stage: deploy
-  scriptt:
+  script:
     - sudo supervisorctl restart errands_system

@@ -1,6 +1,8 @@
 from django.urls import path
-from .views import BoardUpdateView
+from .views import BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView
 
 urlpatterns = [
-    path('update-board/<int:pk>/', BoardUpdateView.as_view()),
+    path('board/<int:pk>/', BoardRetrieveUpdateView.as_view()),
+    path('task/<int:pk>/', TaskRetrieveUpdateView.as_view()),
+    path('create-task/', TaskCreateView.as_view()),
 ]

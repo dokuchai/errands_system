@@ -9,4 +9,3 @@ deploy:
   script:
     - rsync -r ./ /home/uizo/shady/errands_system
     - sudo supervisorctl restart errands_system
-    - sudo apt update

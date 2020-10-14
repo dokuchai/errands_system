@@ -16,6 +16,9 @@ class TaskRetrieveUpdateView(RetrieveUpdateAPIView):
     serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
 
+    def put(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
 
 class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()

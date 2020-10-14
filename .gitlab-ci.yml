@@ -11,5 +11,7 @@ deploy:
 
 job:
   stage: deploy
+  tags:
+    - srv2363
   script:
     - sudo supervisorctl restart errands_system

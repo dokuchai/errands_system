@@ -3,7 +3,7 @@ from .models import Boards, Tasks
 
 
 class TaskListSerializer(serializers.ModelSerializer):
-    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d"])
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"])
 
     class Meta:
         model = Tasks
@@ -11,7 +11,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
-    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d"])
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"])
 
     class Meta:
         model = Tasks

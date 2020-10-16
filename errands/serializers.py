@@ -11,7 +11,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
-    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"])
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
 
     class Meta:
         model = Tasks

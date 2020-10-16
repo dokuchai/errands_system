@@ -1,14 +1,19 @@
+from rest_framework import viewsets
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.permissions import IsAuthenticated
-
-from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer
+from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer
 from .models import Boards, Tasks
 
 
-class BoardRetrieveUpdateView(RetrieveUpdateAPIView):
+class BoardRetrieveUpdateView(viewsets.ModelViewSet):
     queryset = Boards.objects.all()
-    serializer_class = BoardSerializer
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardBaseSerializer
+        elif self.action == "update":
+            return BoardSerializer
 
 
 class TaskRetrieveUpdateView(RetrieveUpdateAPIView):

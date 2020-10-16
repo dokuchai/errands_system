@@ -88,7 +88,7 @@ REST_FRAMEWORK = {
         'users.authentication.ExpiringTokenAuthentication',
     ),
 }
-TOKEN_EXPIRED_AFTER_SECONDS = 86400
+TOKEN_EXPIRED_AFTER_SECONDS = 604800
 LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Moscow'

@@ -1,3 +1,4 @@
+from abc import ABC
 from rest_framework import serializers
 from .models import Boards, Tasks
 
@@ -24,3 +25,17 @@ class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boards
         fields = ('id', 'title', 'tasks')
+
+
+class BoardBaseSerializer(serializers.BaseSerializer, ABC):
+    def to_representation(self, instance):
+        projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
+        [project.update({"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]), many=True,
+                                                     read_only=True).data}) for project in projects]
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "projects": [project for project in projects],
+            "tasks": Tasks.objects.filter(board=instance, project="").values('id', 'title', 'status', 'term',
+                                                                             'responsible', 'icon', 'board'),
+        }

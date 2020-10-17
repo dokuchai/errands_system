@@ -1,5 +1,7 @@
 from rest_framework import serializers
 
+from users.models import CustomUser
+
 
 class CustomUserSerializer(serializers.Serializer):
     id = serializers.IntegerField(required=True)
@@ -14,3 +16,9 @@ class CustomUserSerializer(serializers.Serializer):
 class UserSignInSerializer(serializers.Serializer):
     email = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
+
+
+class NewUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'first_name', "last_name")

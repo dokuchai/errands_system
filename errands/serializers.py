@@ -28,7 +28,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
-    icon = serializers.CharField(source="icon.description")
+    icon = serializers.SerializerMethodField('get_icon_description')
 
     class Meta:
         model = Tasks
@@ -37,6 +37,10 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     def get_responsible_name(self, obj):
         if obj.responsible:
             return f'{obj.responsible.first_name} {obj.responsible.last_name}'
+
+    def get_icon_description(self, obj):
+        if obj.icon:
+            return obj.icon.description
 
 
 class BoardSerializer(serializers.ModelSerializer):

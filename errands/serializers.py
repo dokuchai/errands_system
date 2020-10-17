@@ -7,6 +7,7 @@ from .models import Boards, Tasks
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+
     # responsible = serializers.CharField(source='responsible.get_full_name')
 
     class Meta:
@@ -16,13 +17,15 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
-    # responsible = serializers.CharField(source='responsible.get_full_name')
+    responsible = serializers.SerializerMethodField('get_responsible_name')
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status')
 
-    # def responsible_name(self):
+    def get_responsible_name(self, obj):
+        if obj.responsible:
+            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
 
 
 class BoardSerializer(serializers.ModelSerializer):

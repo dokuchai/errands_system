@@ -68,7 +68,7 @@ class Tasks(ChangeloggableMixin, models.Model):
         ('Просрочена', 'Просрочена'),
         ('Отменена', 'Отменена'),
     )
-    title = models.CharField('Название', max_length=100)
+    title = models.CharField('Название', max_length=255)
     text = models.TextField('Текст задачи', blank=True, default='')
     term = models.DateTimeField('Срок', auto_now=False, blank=True, null=True)
     status = models.CharField('Статус', max_length=22, choices=STATUS, default='В работе')

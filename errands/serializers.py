@@ -10,15 +10,10 @@ from users.serializers import NewUserSerializer
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
-    responsible = serializers.SerializerMethodField('get_responsible_name')
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board')
-
-    def get_responsible_name(self, obj):
-        if obj.responsible:
-            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):

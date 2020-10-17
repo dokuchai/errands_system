@@ -1,8 +1,13 @@
 from rest_framework import viewsets
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
+from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer
-from .models import Boards, Tasks
+from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer, IconSerializer
+from .models import Boards, Tasks, Icons
+
+
+class IconsListView(ListAPIView):
+    queryset = Icons.objects.all()
+    serializer_class = IconSerializer
 
 
 class BoardRetrieveUpdateView(viewsets.ModelViewSet):

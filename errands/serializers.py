@@ -1,15 +1,20 @@
 from abc import ABC
-
-from django.db.models import Value, CharField, F
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks
+from .models import Boards, Tasks, Icons
 from users.serializers import NewUserSerializer
+
+
+class IconSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Icons
+        fields = ('id', 'image', 'description')
 
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    icon = serializers.CharField(source="icon.image.url")
 
     class Meta:
         model = Tasks
@@ -19,6 +24,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
+    icon = serializers.CharField(source="icon.description")
 
     class Meta:
         model = Tasks
@@ -46,7 +52,10 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
                                                                         'icon', 'board', 'responsible')
         [task.update(
             {"responsible": NewUserSerializer(CustomUser.objects.get(id=task['responsible'])).data['full_name']}) for
-         task in tasks if task['responsible']]
+            task in tasks if task['responsible']]
+        [task.update(
+            {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
+            task in tasks if task['icon']]
         return {
             "id": instance.id,
             "title": instance.title,

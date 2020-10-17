@@ -51,7 +51,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
                                                                         'icon', 'board', 'responsible')
         [task.update(
             {"responsible": NewUserSerializer(CustomUser.objects.get(id=task['responsible'])).data['full_name']}) for
-         task in tasks]
+         task in tasks if task['responsible']]
         return {
             "id": instance.id,
             "title": instance.title,

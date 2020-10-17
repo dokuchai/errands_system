@@ -1,10 +1,13 @@
 from abc import ABC
+
+from django.db.models import Value, CharField
 from rest_framework import serializers
 from .models import Boards, Tasks
 
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    responsible = serializers.CharField(source='responsible.get_full_name')
 
     class Meta:
         model = Tasks
@@ -13,6 +16,7 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
+    responsible = serializers.CharField(source='responsible.get_full_name')
 
     class Meta:
         model = Tasks
@@ -37,5 +41,5 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
             "title": instance.title,
             "projects": [project for project in projects],
             "tasks": Tasks.objects.filter(board=instance, project="").values('id', 'title', 'status', 'term',
-                                                                             'responsible', 'icon', 'board'),
+                                                                             'icon', 'board', 'responsible'),
         }

@@ -2,17 +2,23 @@ from abc import ABC
 
 from django.db.models import Value, CharField, F
 from rest_framework import serializers
+
+from users.models import CustomUser
 from .models import Boards, Tasks
+from users.serializers import NewUserSerializer
 
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
-
-    # responsible = serializers.CharField(source='responsible.get_full_name')
+    responsible = serializers.SerializerMethodField('get_responsible_name')
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board')
+
+    def get_responsible_name(self, obj):
+        if obj.responsible:
+            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
@@ -41,10 +47,14 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
         projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
         [project.update({"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]), many=True,
                                                      read_only=True).data}) for project in projects]
+        tasks = Tasks.objects.filter(board=instance, project="").values('id', 'title', 'status', 'term',
+                                                                        'icon', 'board', 'responsible')
+        [task.update(
+            {"responsible": NewUserSerializer(CustomUser.objects.get(id=task['responsible'])).data['full_name']}) for
+         task in tasks]
         return {
             "id": instance.id,
             "title": instance.title,
             "projects": [project for project in projects],
-            "tasks": Tasks.objects.filter(board=instance, project="").values('id', 'title', 'status', 'term',
-                                                                             'icon', 'board', 'responsible')
+            "tasks": [task for task in tasks]
         }

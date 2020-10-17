@@ -19,6 +19,11 @@ class UserSignInSerializer(serializers.Serializer):
 
 
 class NewUserSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField('get_full_name')
+
     class Meta:
         model = CustomUser
-        fields = ('id', 'first_name', "last_name")
+        fields = ('id', 'first_name', "last_name", 'full_name')
+
+    def get_full_name(self, obj):
+        return f'{obj.first_name} {obj.last_name}'

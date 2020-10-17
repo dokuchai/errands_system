@@ -14,11 +14,15 @@ class IconSerializer(serializers.ModelSerializer):
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
-    icon = serializers.CharField(source="icon.image.url")
+    icon = serializers.SerializerMethodField("get_icon_url")
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board')
+
+    def get_icon_url(self, obj):
+        if obj.icon:
+            return obj.icon.image.url
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):

@@ -92,6 +92,8 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
         icon, responsible = validated_data.pop('icon', None), validated_data.pop('responsible', None)
+        if not responsible:
+            instance.responsible = None
         try:
             instance.icon = Icons.objects.get(description=icon['description'])
         except Icons.DoesNotExist:

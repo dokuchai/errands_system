@@ -76,8 +76,10 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
         icon = validated_data.pop('icon', None)
-        if icon:
+        try:
             instance.icon = Icons.objects.get(description=icon['description'])
+        except Icons.DoesNotExist:
+            instance.icon = None
         instance.save()
         return instance
 

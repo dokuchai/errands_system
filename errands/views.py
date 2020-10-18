@@ -41,6 +41,9 @@ class TaskCreateView(CreateAPIView):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
+        if 'icon' in self.request.data:
+            icon = Icons.objects.get(description=self.request.data['icon'])
+            serializer.save(icon=icon)
         serializer.save(board_id=self.kwargs['pk'])
 
 

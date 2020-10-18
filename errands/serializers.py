@@ -65,6 +65,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True,
                                      required=False)
     icon = serializers.CharField(source='icon.description', allow_null=True, required=False)
+    responsible = serializers.IntegerField(source='responsible.id', allow_null=True, required=False)
 
     class Meta:
         model = Tasks
@@ -76,11 +77,19 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         instance.project = validated_data.get('project', instance.project)
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
-        icon = validated_data.pop('icon', None)
+        icon, responsible = validated_data.pop('icon', None), validated_data.pop('responsible', None)
         try:
             instance.icon = Icons.objects.get(description=icon['description'])
         except Icons.DoesNotExist:
             instance.icon = None
+        except TypeError:
+            pass
+        try:
+            instance.responsible = CustomUser.objects.get(id=responsible['id'])
+        except CustomUser.DoesNotExist:
+            instance.responsible = None
+        except TypeError:
+            pass
         instance.save()
         return instance
 

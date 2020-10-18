@@ -43,6 +43,14 @@ class TaskDetailSerializer(serializers.ModelSerializer):
             return obj.icon.description
 
 
+class TaskUpdateSerializer(serializers.ModelSerializer):
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
+
+    class Meta:
+        model = Tasks
+        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status')
+
+
 class BoardSerializer(serializers.ModelSerializer):
     tasks = TaskListSerializer(many=True)
 
@@ -54,10 +62,11 @@ class BoardSerializer(serializers.ModelSerializer):
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
         projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
-        [project.update({"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]), many=True,
-                                                     read_only=True).data}) for project in projects]
-        tasks = Tasks.objects.filter(board=instance, project="").values('id', 'title', 'status', 'term',
-                                                                        'icon', 'board', 'responsible')
+        [project.update(
+            {"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]).order_by('-id'), many=True,
+                                         read_only=True).data}) for project in projects]
+        tasks = Tasks.objects.filter(board=instance, project="").order_by('-id').values('id', 'title', 'status', 'term',
+                                                                                        'icon', 'board', 'responsible')
         [task.update(
             {"responsible": NewUserSerializer(CustomUser.objects.get(id=task['responsible'])).data['full_name']}) for
             task in tasks if task['responsible']]

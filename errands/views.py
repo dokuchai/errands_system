@@ -1,7 +1,8 @@
 from rest_framework import viewsets
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer, IconSerializer
+from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer, IconSerializer, \
+    TaskUpdateSerializer
 from .models import Boards, Tasks, Icons
 
 
@@ -21,13 +22,15 @@ class BoardRetrieveUpdateView(viewsets.ModelViewSet):
             return BoardSerializer
 
 
-class TaskRetrieveUpdateView(RetrieveUpdateAPIView):
+class TaskRetrieveUpdateView(viewsets.ModelViewSet):
     queryset = Tasks.objects.all()
-    serializer_class = TaskDetailSerializer
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return TaskDetailSerializer
+        elif self.action == "partial_update":
+            return TaskUpdateSerializer
 
 
 class TaskCreateView(CreateAPIView):

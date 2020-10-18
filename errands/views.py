@@ -37,7 +37,7 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
 
 class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()
-    serializer_class = TaskUpdateSerializer
+    serializer_class = TaskListSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):

@@ -3,7 +3,6 @@ from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission
-from users.serializers import NewUserSerializer
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -15,14 +14,19 @@ class IconSerializer(serializers.ModelSerializer):
 class BoardFriendSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField(source="friend.first_name")
     last_name = serializers.CharField(source="friend.last_name")
+    full_name = serializers.SerializerMethodField('get_full_name')
 
     class Meta:
         model = FriendBoardPermission
-        fields = ('id', 'first_name', 'last_name', 'redactor')
+        fields = ('id', 'first_name', 'last_name', 'full_name', 'redactor')
+
+    def get_full_name(self, obj):
+        return f'{obj.friend.first_name} {obj.friend.last_name}'
 
 
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField("get_icon_url")
 
     class Meta:
@@ -32,6 +36,10 @@ class TaskListSerializer(serializers.ModelSerializer):
     def get_icon_url(self, obj):
         if obj.icon:
             return obj.icon.image.url
+
+    def get_responsible_name(self, obj):
+        if obj.responsible:
+            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
 
 
 class TaskDetailSerializer(serializers.ModelSerializer):
@@ -90,9 +98,9 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
                                          read_only=True).data}) for project in projects]
         tasks = Tasks.objects.filter(board=instance, project="").order_by('-id').values('id', 'title', 'status', 'term',
                                                                                         'icon', 'board', 'responsible')
-        [task.update(
-            {"responsible": NewUserSerializer(CustomUser.objects.get(id=task['responsible'])).data['full_name']}) for
-            task in tasks if task['responsible']]
+        [task.update({"responsible":
+                          BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[
+                              'full_name']}) for task in tasks if task['responsible']]
         [task.update(
             {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
             task in tasks if task['icon']]

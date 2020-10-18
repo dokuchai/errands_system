@@ -1,3 +1,4 @@
+from django.utils.crypto import get_random_string
 from rest_framework import viewsets
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -44,6 +45,13 @@ class TaskCreateView(CreateAPIView):
         if 'icon' in self.request.data:
             icon = Icons.objects.get(description=self.request.data['icon'])
             serializer.save(icon=icon)
+        if 'first_name' in self.request.data and 'last_name' in self.request.data:
+            domain = get_random_string(length=5).lower()
+            responsible = CustomUser.objects.create(first_name=self.request.data['first_name'],
+                                                    last_name=self.request.data['last_name'], email=f'{domain}@new.com')
+            board = Boards.objects.get(id=self.kwargs['pk'])
+            board.friends.add(responsible)
+            serializer.save(responsible=responsible)
         serializer.save(board_id=self.kwargs['pk'])
 
 

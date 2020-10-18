@@ -1,8 +1,11 @@
 from abc import ABC
+
+from django.utils.crypto import get_random_string
 from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission
+from .services import add_new_user
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -65,11 +68,12 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True,
                                      required=False)
     icon = serializers.CharField(source='icon.description', allow_null=True, required=False)
-    # responsible = serializers.IntegerField(source='responsible.id')
+    first_name = serializers.CharField(default='')
+    last_name = serializers.CharField(default='')
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status')
+        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'first_name', 'last_name')
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
@@ -86,11 +90,15 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             pass
         try:
             responsible_name = str(responsible).split(' ')
-            instance.responsible = CustomUser.objects.get(first_name=responsible_name[0], last_name=responsible_name[1])
+            instance.responsible = CustomUser.objects.get(first_name=responsible_name[0],
+                                                          last_name=responsible_name[1])
         except CustomUser.DoesNotExist:
             instance.responsible = None
         except (TypeError, IndexError):
             pass
+        if 'first_name' in validated_data and 'last_name' in validated_data:
+            add_new_user(first_name=validated_data['first_name'], last_name=validated_data['last_name'],
+                         pk=instance.board.id, task=instance)
         instance.save()
         return instance
 

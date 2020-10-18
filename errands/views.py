@@ -1,12 +1,12 @@
-from django.utils.crypto import get_random_string
 from rest_framework import viewsets
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
-from users.models import CustomUser
 from .serializers import (BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission
+from .services import add_new_user
 
 
 class IconsListView(ListAPIView):
@@ -49,12 +49,8 @@ class TaskCreateView(CreateAPIView):
             except Icons.DoesNotExist:
                 pass
         if 'first_name' in self.request.data and 'last_name' in self.request.data:
-            domain = get_random_string(length=5).lower()
-            responsible = CustomUser.objects.create(first_name=self.request.data['first_name'],
-                                                    last_name=self.request.data['last_name'], email=f'{domain}@new.com')
-            board = Boards.objects.get(id=self.kwargs['pk'])
-            board.friends.add(responsible)
-            serializer.save(responsible=responsible)
+            add_new_user(first_name=self.request.data['first_name'], last_name=self.request.data['last_name'],
+                         pk=self.kwargs['pk'], serializer=serializer)
         serializer.save(board_id=self.kwargs['pk'])
 
 

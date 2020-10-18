@@ -44,10 +44,11 @@ class TaskListSerializer(serializers.ModelSerializer):
     responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField("get_icon_url")
     resp_id = serializers.SerializerMethodField('get_resp_id')
+    so_executors = SoExecutorSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'resp_id')
+        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'resp_id', 'so_executors')
 
     def get_icon_url(self, obj):
         if obj.icon:
@@ -150,6 +151,9 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
         [task.update(
             {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
             task in tasks if task['icon']]
+        [task.update(
+            {"so_executors": SoExecutorSerializer(CustomUser.objects.filter(so_executors=task['id']), many=True).data})
+         for task in tasks]
         return {
             "id": instance.id,
             "title": instance.title,

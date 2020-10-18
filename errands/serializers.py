@@ -53,7 +53,8 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
-    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True,
+                                     required=False)
     icon = serializers.CharField(source='icon.description')
 
     class Meta:

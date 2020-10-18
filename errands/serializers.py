@@ -75,7 +75,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         instance.project = validated_data.get('project', instance.project)
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
-        icon = validated_data.pop('icon', [])
+        icon = validated_data.pop('icon', None)
         if icon:
             instance.icon = Icons.objects.get(description=icon['description'])
         instance.save()

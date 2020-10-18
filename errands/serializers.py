@@ -12,6 +12,7 @@ class IconSerializer(serializers.ModelSerializer):
 
 
 class BoardFriendSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(source='friend.id')
     first_name = serializers.CharField(source="friend.first_name")
     last_name = serializers.CharField(source="friend.last_name")
     full_name = serializers.SerializerMethodField('get_full_name')

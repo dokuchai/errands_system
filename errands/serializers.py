@@ -59,7 +59,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status')
+        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'resp_id')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

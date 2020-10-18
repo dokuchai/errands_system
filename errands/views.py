@@ -1,10 +1,12 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
+from users.models import CustomUser
 from .serializers import (BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer,
-                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer)
+                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission
 from .services import add_new_user
 
@@ -69,3 +71,11 @@ class FriendView(RetrieveAPIView):
 
     def get_object(self):
         return FriendBoardPermission.objects.get(friend_id=self.kwargs['pk2'], board_id=self.kwargs['pk'])
+
+
+class AddExecutorView(APIView):
+    def post(self, request, pk):
+        task = Tasks.objects.get(id=pk)
+        user = CustomUser.objects.get(id=request.data.get('id'))
+        task.so_executors.add(user)
+        return Response(SoExecutorSerializer(user).data, status=status.HTTP_200_OK)

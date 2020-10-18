@@ -14,6 +14,17 @@ class IconSerializer(serializers.ModelSerializer):
         fields = ('id', 'image', 'description')
 
 
+class SoExecutorSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField('get_full_name')
+
+    class Meta:
+        model = CustomUser
+        fields = ('id', 'full_name')
+
+    def get_full_name(self, obj):
+        return f'{obj.first_name} {obj.last_name}'
+
+
 class BoardFriendSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(source='friend.id')
     first_name = serializers.CharField(source="friend.first_name")
@@ -56,10 +67,11 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField('get_icon_description')
     resp_id = serializers.SerializerMethodField('get_resp_id')
+    so_executors = SoExecutorSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'resp_id')
+        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'resp_id', 'so_executors')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

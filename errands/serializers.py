@@ -1,6 +1,6 @@
 from abc import ABC
 
-from django.utils.crypto import get_random_string
+from django.db.models import F
 from rest_framework import serializers
 
 from users.models import CustomUser
@@ -32,10 +32,11 @@ class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField("get_icon_url")
+    resp_id = serializers.SerializerMethodField('get_resp_id')
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board')
+        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'resp_id')
 
     def get_icon_url(self, obj):
         if obj.icon:
@@ -45,11 +46,16 @@ class TaskListSerializer(serializers.ModelSerializer):
         if obj.responsible:
             return f'{obj.responsible.first_name} {obj.responsible.last_name}'
 
+    def get_resp_id(self, obj):
+        if obj.responsible:
+            return obj.responsible.id
+
 
 class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField('get_icon_description')
+    resp_id = serializers.SerializerMethodField('get_resp_id')
 
     class Meta:
         model = Tasks
@@ -62,6 +68,10 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     def get_icon_description(self, obj):
         if obj.icon:
             return obj.icon.description
+
+    def get_resp_id(self, obj):
+        if obj.responsible:
+            return obj.responsible.id
 
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
@@ -118,7 +128,8 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
             {"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]).order_by('-id'), many=True,
                                          read_only=True).data}) for project in projects]
         tasks = Tasks.objects.filter(board=instance, project="").order_by('-id').values('id', 'title', 'status', 'term',
-                                                                                        'icon', 'board', 'responsible')
+                                                                                        'icon', 'board', 'responsible',
+                                                                                        resp_id=F('responsible_id'))
         [task.update({"responsible":
                           BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[
                               'full_name']}) for task in tasks if task['responsible']]

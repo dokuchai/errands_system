@@ -1,6 +1,6 @@
 from django.utils.crypto import get_random_string
 from rest_framework import viewsets
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 
 from users.models import CustomUser
@@ -62,3 +62,11 @@ class BoardFriendsView(ListAPIView):
     def get_queryset(self):
         friends = FriendBoardPermission.objects.filter(board=self.kwargs["pk"])
         return friends
+
+
+class FriendView(RetrieveAPIView):
+    serializer_class = BoardFriendSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return FriendBoardPermission.objects.get(friend_id=self.kwargs['pk2'], board_id=self.kwargs['pk'])

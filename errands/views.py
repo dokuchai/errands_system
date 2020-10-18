@@ -1,9 +1,11 @@
 from rest_framework import viewsets
-from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.permissions import IsAuthenticated
-from .serializers import BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer, IconSerializer, \
-    TaskUpdateSerializer
-from .models import Boards, Tasks, Icons
+
+from users.models import CustomUser
+from .serializers import (BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer,
+                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer)
+from .models import Boards, Tasks, Icons, FriendBoardPermission
 
 
 class IconsListView(ListAPIView):
@@ -35,8 +37,17 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
 
 class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()
-    serializer_class = TaskListSerializer
+    serializer_class = TaskUpdateSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
         serializer.save(board_id=self.kwargs['pk'])
+
+
+class BoardFriendsView(ListAPIView):
+    serializer_class = BoardFriendSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        friends = FriendBoardPermission.objects.filter(board=self.kwargs["pk"])
+        return friends

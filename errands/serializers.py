@@ -2,7 +2,7 @@ from abc import ABC
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks, Icons
+from .models import Boards, Tasks, Icons, FriendBoardPermission
 from users.serializers import NewUserSerializer
 
 
@@ -10,6 +10,15 @@ class IconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Icons
         fields = ('id', 'image', 'description')
+
+
+class BoardFriendSerializer(serializers.ModelSerializer):
+    first_name = serializers.CharField(source="friend.first_name")
+    last_name = serializers.CharField(source="friend.last_name")
+
+    class Meta:
+        model = FriendBoardPermission
+        fields = ('id', 'first_name', 'last_name', 'redactor')
 
 
 class TaskListSerializer(serializers.ModelSerializer):
@@ -45,10 +54,23 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
 class TaskUpdateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
+    icon = serializers.CharField(source='icon.description')
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status')
+
+    def update(self, instance, validated_data):
+        instance.title = validated_data.get('title', instance.title)
+        instance.text = validated_data.get('text', instance.text)
+        instance.project = validated_data.get('project', instance.project)
+        instance.term = validated_data.get('term', instance.term)
+        instance.status = validated_data.get('status', instance.status)
+        icon = validated_data.pop('icon', [])
+        if icon:
+            instance.icon = Icons.objects.get(description=icon['description'])
+        instance.save()
+        return instance
 
 
 class BoardSerializer(serializers.ModelSerializer):

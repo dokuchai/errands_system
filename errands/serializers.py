@@ -39,6 +39,20 @@ class BoardFriendSerializer(serializers.ModelSerializer):
         return f'{obj.friend.first_name} {obj.friend.last_name}'
 
 
+class TaskCreateSerializer(serializers.ModelSerializer):
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    icon = serializers.SerializerMethodField("get_icon_url")
+    so_executors = SoExecutorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Tasks
+        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'so_executors')
+
+    def get_icon_url(self, obj):
+        if obj.icon:
+            return obj.icon.image.url
+
+
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     responsible = serializers.SerializerMethodField('get_responsible_name')
@@ -153,7 +167,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
             task in tasks if task['icon']]
         [task.update(
             {"so_executors": SoExecutorSerializer(CustomUser.objects.filter(so_executors=task['id']), many=True).data})
-         for task in tasks]
+            for task in tasks]
         return {
             "id": instance.id,
             "title": instance.title,

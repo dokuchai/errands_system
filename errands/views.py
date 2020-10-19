@@ -7,8 +7,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models import CustomUser
-from .serializers import (BoardSerializer, TaskDetailSerializer, TaskListSerializer, BoardBaseSerializer,
-                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer)
+from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
+                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer,
+                          TaskCreateSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission
 from .services import add_new_user
 
@@ -42,9 +43,27 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
 
 class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()
-    serializer_class = TaskListSerializer
+    serializer_class = TaskCreateSerializer
     permission_classes = [IsAuthenticated]
 
+    # def post(self, request, *args, **kwargs):
+    #     icon, term, project = None, None, ''
+    #     if 'icon' in request.data:
+    #         try:
+    #             icon = Icons.objects.get(description=request.data['icon'])
+    #         except Icons.DoesNotExist:
+    #             pass
+    #     if 'term' in request.data:
+    #         term = request.data['term']
+    #     if 'project' in request.data:
+    #         project = request.data['project']
+    #     task = Tasks.objects.create(title=request.data['title'], icon=icon, board_id=self.kwargs['pk'], term=term,
+    #                                 project=project)
+    #     if 'so_executors' in request.data:
+    #         for name in request.data['so_executors']:
+    #             name = name.split(' ')
+    #             add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], task=task)
+    #     return Response(self.serializer_class(task).data, status=status.HTTP_201_CREATED)
     def perform_create(self, serializer):
         if 'icon' in self.request.data:
             try:
@@ -62,9 +81,10 @@ class TaskCreateView(CreateAPIView):
 def add_executor(instance, created, **kwargs):
     task = instance
     if created:
-        task.so_executors.add(task.responsible)
-        task.responsible = None
-        task.save()
+        if task.responsible:
+            task.so_executors.add(task.responsible)
+            task.responsible = None
+            task.save()
 
 
 class BoardFriendsView(ListAPIView):

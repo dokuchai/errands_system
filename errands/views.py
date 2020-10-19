@@ -50,9 +50,9 @@ class TaskCreateView(CreateAPIView):
                 serializer.save(icon=icon)
             except Icons.DoesNotExist:
                 pass
-        if 'first_name' in self.request.data and 'last_name' in self.request.data:
-            add_new_user(first_name=self.request.data['first_name'], last_name=self.request.data['last_name'],
-                         board_id=self.kwargs['pk'], serializer=serializer)
+        if 'name' in self.request.data:
+            name = str(self.request.data['name']).split(' ')
+            add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], serializer=serializer)
         serializer.save(board_id=self.kwargs['pk'])
 
 
@@ -76,9 +76,32 @@ class AddExecutorView(APIView):
     def post(self, request, pk):
         task, user = Tasks.objects.get(id=pk), None
         if 'id' in request.data:
-            user = CustomUser.objects.get(id=request.data.get('id'))
-        elif 'first_name' in request.data and 'last_name' in request.data:
-            user = add_new_user(first_name=request.data.get['first_name'], last_name=request.data.get('last_name'),
-                                board_id=task.board.id)
-        task.so_executors.add(user)
+            try:
+                user = CustomUser.objects.get(id=request.data.get('id'))
+                task.so_executors.add(user)
+            except CustomUser.DoesNotExist:
+                return Response({"message": "Пользователь не найден!"}, status=status.HTTP_400_BAD_REQUEST)
+            except ValueError:
+                return Response({"message": "Некорректный тип данных (ожидается целочисленное значение)"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        elif 'name' in request.data:
+            name = str(request.data.get('name')).split(' ')
+            user = add_new_user(first_name=name[1], last_name=name[0], board_id=task.board.id)
+            task.so_executors.add(user)
         return Response(SoExecutorSerializer(user).data, status=status.HTTP_200_OK)
+
+
+class DeleteExecutorView(APIView):
+    def post(self, request, pk):
+        try:
+            task, user = Tasks.objects.get(id=pk), CustomUser.objects.get(id=request.data.get('id'))
+            if user in task.so_executors.all():
+                task.so_executors.remove(user)
+                return Response({"message": "Соисполнитель удален!"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Пользователь не является соисполнителем у данной задачи!"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        except CustomUser.DoesNotExist:
+            return Response({"message": "Пользователя не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+        except Tasks.DoesNotExist:
+            return Response({"message": "Задачи не существует!"}, status=status.HTTP_400_BAD_REQUEST)

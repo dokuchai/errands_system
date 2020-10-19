@@ -11,7 +11,7 @@ def add_new_user(first_name, last_name, board_id, task=None, serializer=None):
     board = Boards.objects.get(id=board_id)
     board.friends.add(user)
     if task:
-        task.responsible = user
+        task.so_executors.add(user)
     if serializer:
         serializer.save(responsible=user)
     return user

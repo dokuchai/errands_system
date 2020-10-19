@@ -52,7 +52,7 @@ class TaskCreateView(CreateAPIView):
                 pass
         if 'first_name' in self.request.data and 'last_name' in self.request.data:
             add_new_user(first_name=self.request.data['first_name'], last_name=self.request.data['last_name'],
-                         pk=self.kwargs['pk'], serializer=serializer)
+                         board_id=self.kwargs['pk'], serializer=serializer)
         serializer.save(board_id=self.kwargs['pk'])
 
 
@@ -75,7 +75,11 @@ class FriendView(RetrieveAPIView):
 
 class AddExecutorView(APIView):
     def post(self, request, pk):
-        task = Tasks.objects.get(id=pk)
-        user = CustomUser.objects.get(id=request.data.get('id'))
+        task, user = Tasks.objects.get(id=pk), None
+        if 'id' in request.data:
+            user = CustomUser.objects.get(id=request.data.get('id'))
+        elif 'first_name' in request.data and 'last_name' in request.data:
+            user = add_new_user(first_name=request.data.get['first_name'], last_name=request.data.get('last_name'),
+                                board_id=task.board.id)
         task.so_executors.add(user)
         return Response(SoExecutorSerializer(user).data, status=status.HTTP_200_OK)

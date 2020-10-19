@@ -123,7 +123,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             pass
         if 'first_name' in validated_data and 'last_name' in validated_data:
             add_new_user(first_name=validated_data['first_name'], last_name=validated_data['last_name'],
-                         pk=instance.board.id, task=instance)
+                         board_id=instance.board.id, task=instance)
         instance.save()
         return instance
 

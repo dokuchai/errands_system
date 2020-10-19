@@ -65,16 +65,16 @@ class TaskCreateView(CreateAPIView):
     #             add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], task=task)
     #     return Response(self.serializer_class(task).data, status=status.HTTP_201_CREATED)
     def perform_create(self, serializer):
+        icon = None
         if 'icon' in self.request.data:
             try:
                 icon = Icons.objects.get(description=self.request.data['icon'])
-                serializer.save(icon=icon)
             except Icons.DoesNotExist:
                 pass
         if 'name' in self.request.data:
             name = str(self.request.data['name']).split(' ')
             add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], serializer=serializer)
-        serializer.save(board_id=self.kwargs['pk'])
+        serializer.save(board_id=self.kwargs['pk'], icon=icon)
 
 
 @receiver(post_save, sender=Tasks)

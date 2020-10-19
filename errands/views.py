@@ -58,7 +58,6 @@ class TaskCreateView(CreateAPIView):
 
 class BoardFriendsView(ListAPIView):
     serializer_class = BoardFriendSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         friends = FriendBoardPermission.objects.filter(board=self.kwargs["pk"])

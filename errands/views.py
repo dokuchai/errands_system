@@ -1,3 +1,5 @@
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -54,6 +56,15 @@ class TaskCreateView(CreateAPIView):
             name = str(self.request.data['name']).split(' ')
             add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], serializer=serializer)
         serializer.save(board_id=self.kwargs['pk'])
+
+
+@receiver(post_save, sender=Tasks)
+def add_executor(instance, created, **kwargs):
+    task = instance
+    if created:
+        task.so_executors.add(task.responsible)
+        task.responsible = None
+        task.save()
 
 
 class BoardFriendsView(ListAPIView):

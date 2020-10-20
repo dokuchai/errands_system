@@ -197,6 +197,6 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": [project for project in projects],
+            "projects": [project for project in projects if project['tasks']],
             "tasks": [task for task in tasks]
         }

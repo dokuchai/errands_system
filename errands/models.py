@@ -63,15 +63,15 @@ post_delete.connect(journal_delete_handler, sender=Icons)
 class Tasks(ChangeloggableMixin, models.Model):
     STATUS = (
         ('В работе', 'В работе'),
-        ('Выполнена', 'Выполнена'),
-        ('Выполнена и проверена', 'Выполнена и проверена'),
-        ('Просрочена', 'Просрочена'),
-        ('Отменена', 'Отменена'),
+        ('Требуется помощь', 'Требуется помощь'),
+        ('Отменено', 'Отменено'),
+        ('Завершено', 'Завершено'),
+        ('Завершено и подтверждено', 'Завершено и подтверждено'),
     )
     title = models.CharField('Название', max_length=255)
     text = models.TextField('Текст задачи', blank=True, default='')
     term = models.DateTimeField('Срок', auto_now=False, blank=True, null=True)
-    status = models.CharField('Статус', max_length=22, choices=STATUS, default='В работе')
+    status = models.CharField('Статус', max_length=25, choices=STATUS, default='В работе')
     project = models.CharField('Проект', max_length=100, default='', blank=True)
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks', verbose_name='Доска', blank=True,
                               null=True)

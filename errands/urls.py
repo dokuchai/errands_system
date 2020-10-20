@@ -1,9 +1,10 @@
 from django.urls import path
 from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView, IconsListView, BoardFriendsView,
-                    FriendView, AddExecutorView, DeleteExecutorView)
+                    FriendView, AddExecutorView, DeleteExecutorView, BoardTasksActiveView)
 
 urlpatterns = [
     path('board/<int:pk>/', BoardRetrieveUpdateView.as_view({"get": "retrieve", "put": "update"})),
+    path('board/<int:pk>/active-tasks/', BoardTasksActiveView.as_view({"get": "retrieve", "put": "update"})),
     path('task/<int:pk>/', TaskRetrieveUpdateView.as_view({"get": "retrieve", "put": "partial_update"})),
     path('task/<int:pk>/add-executor/', AddExecutorView.as_view()),
     path('task/<int:pk>/delete-executor/', DeleteExecutorView.as_view()),

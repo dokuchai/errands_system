@@ -174,3 +174,29 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
             "projects": [project for project in projects],
             "tasks": [task for task in tasks]
         }
+
+
+class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
+    def to_representation(self, instance):
+        projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
+        [project.update(
+            {"tasks": TaskListSerializer(
+                Tasks.objects.filter(project=project["project"]).exclude(status__startswith='Завершено').order_by(
+                    '-id'), many=True, read_only=True).data}) for project in projects]
+        tasks = Tasks.objects.filter(board=instance, project="").exclude(status__startswith='Завершено').order_by(
+            '-id').values('id', 'title', 'status', 'term', 'icon', 'board', 'responsible', resp_id=F('responsible_id'))
+        [task.update({"responsible":
+                          BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[
+                              'full_name']}) for task in tasks if task['responsible']]
+        [task.update(
+            {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
+            task in tasks if task['icon']]
+        [task.update(
+            {"so_executors": SoExecutorSerializer(CustomUser.objects.filter(so_executors=task['id']), many=True).data})
+            for task in tasks]
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "projects": [project for project in projects],
+            "tasks": [task for task in tasks]
+        }

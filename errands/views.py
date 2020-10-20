@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer,
-                          TaskCreateSerializer)
+                          TaskCreateSerializer, BoardActiveTasksSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission
 from .services import add_new_user
 
@@ -26,6 +26,17 @@ class BoardRetrieveUpdateView(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == "retrieve":
             return BoardBaseSerializer
+        elif self.action == "update":
+            return BoardSerializer
+
+
+class BoardTasksActiveView(viewsets.ModelViewSet):
+    queryset = Boards.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardActiveTasksSerializer
         elif self.action == "update":
             return BoardSerializer
 

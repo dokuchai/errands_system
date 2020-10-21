@@ -181,9 +181,9 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
         [project.update(
             {"tasks": TaskListSerializer(
-                Tasks.objects.filter(project=project["project"]).exclude(status__startswith='Завершено').order_by(
+                Tasks.objects.filter(project=project["project"], status__in=('В работе', 'Требуется помощь')).order_by(
                     '-id'), many=True, read_only=True).data}) for project in projects]
-        tasks = Tasks.objects.filter(board=instance, project="").exclude(status__startswith='Завершено').order_by(
+        tasks = Tasks.objects.filter(board=instance, project="", status__in=('В работе', 'Требуется помощь')).order_by(
             '-id').values('id', 'title', 'status', 'term', 'icon', 'board', 'responsible', resp_id=F('responsible_id'))
         [task.update({"responsible":
                           BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[

@@ -11,7 +11,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission
-from .services import add_new_user
+from .services import add_new_user, add_new_responsible
 
 
 class IconsListView(ListAPIView):
@@ -76,26 +76,21 @@ class TaskCreateView(CreateAPIView):
     #             add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], task=task)
     #     return Response(self.serializer_class(task).data, status=status.HTTP_201_CREATED)
     def perform_create(self, serializer):
-        icon = None
+        icon, resp = None, None
+        executors = []
         if 'icon' in self.request.data:
             try:
                 icon = Icons.objects.get(description=self.request.data['icon'])
             except Icons.DoesNotExist:
                 pass
-        if 'name' in self.request.data:
-            name = str(self.request.data['name']).split(' ')
-            add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'], serializer=serializer)
-        serializer.save(board_id=self.kwargs['pk'], icon=icon)
-
-
-@receiver(post_save, sender=Tasks)
-def add_executor(instance, created, **kwargs):
-    task = instance
-    if created:
-        if task.responsible:
-            task.so_executors.add(task.responsible)
-            task.responsible = None
-            task.save()
+        if 'resp_name' in self.request.data:
+            name = str(self.request.data['resp_name']).split(' ')
+            resp = add_new_responsible(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'])
+        if 'exec_name' in self.request.data:
+            for executor in self.request.data['exec_name']:
+                name = executor.split(' ')
+                executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk']))
+        serializer.save(board_id=self.kwargs['pk'], icon=icon, so_executors=executors, responsible=resp)
 
 
 class BoardFriendsView(ListAPIView):

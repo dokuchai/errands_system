@@ -175,7 +175,10 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                 instance.responsible = None
         if 'name' in validated_data:
             name = str(validated_data['name']).split(' ')
-            responsible = add_new_responsible(first_name=name[0], last_name=name[1], board_id=instance.board.id)
+            try:
+                responsible = CustomUser.objects.get(first_name=name[1], last_name=name[0], friend_board=instance.board)
+            except CustomUser.DoesNotExist:
+                responsible = add_new_responsible(first_name=name[1], last_name=name[0], board_id=instance.board.id)
             instance.responsible = responsible
         if 'project' in validated_data:
             project, created = Project.objects.get_or_create(title=validated_data['project'])
@@ -184,9 +187,9 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             for executor in validated_data['exec_name']:
                 name = executor.split(' ')
                 if len(name) == 1:
-                    executors.append(add_new_user(first_name=name[0], last_name='', board_id=instance.board.id))
+                    executors.append(add_new_user(first_name=name[1], last_name='', board_id=instance.board.id))
                 elif len(name) == 2:
-                    executors.append(add_new_user(first_name=name[0], last_name=name[1], board_id=instance.board.id))
+                    executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=instance.board.id))
         if 'exec_id' in validated_data:
             for executor in validated_data['exec_id']:
                 executors.append(CustomUser.objects.get(id=executor))

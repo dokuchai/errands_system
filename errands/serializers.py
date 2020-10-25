@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission
-from .services import add_new_user
+from .services import add_new_responsible
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -107,10 +107,13 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     icon = serializers.CharField(source='icon.description', allow_null=True, required=False)
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     name = serializers.CharField(default='')
+    resp_id = serializers.CharField(default='')
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'name', 'so_executors')
+        fields = (
+            'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'name', 'so_executors',
+            'resp_id')
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
@@ -118,26 +121,25 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
         instance.project = validated_data.get('project', instance.project)
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
-        icon, responsible = validated_data.pop('icon', None), validated_data.pop('responsible', None)
-        if not responsible:
-            instance.responsible = None
+        icon = validated_data.pop('icon', None)
         try:
             instance.icon = Icons.objects.get(description=icon['description'])
         except Icons.DoesNotExist:
             instance.icon = None
         except TypeError:
             pass
-        try:
-            responsible_name = str(responsible).split(' ')
-            instance.responsible = CustomUser.objects.get(first_name=responsible_name[0],
-                                                          last_name=responsible_name[1])
-        except CustomUser.DoesNotExist:
-            instance.responsible = None
-        except (TypeError, IndexError):
-            pass
+        if 'resp_id' in validated_data:
+            if str(validated_data['resp_id']).isdigit():
+                try:
+                    instance.responsible = CustomUser.objects.get(id=int(validated_data['resp_id']))
+                except CustomUser.DoesNotExist:
+                    pass
+            else:
+                instance.responsible = None
         if 'name' in validated_data:
             name = str(validated_data['name']).split(' ')
-            add_new_user(first_name=name[1], last_name=name[0], board_id=instance.board.id, task=instance)
+            responsible = add_new_responsible(first_name=name[1], last_name=name[0], board_id=instance.board.id)
+            instance.responsible = responsible
         instance.save()
         return instance
 

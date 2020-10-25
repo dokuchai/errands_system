@@ -86,10 +86,15 @@ class TaskCreateView(CreateAPIView):
         if 'resp_name' in self.request.data:
             name = str(self.request.data['resp_name']).split(' ')
             resp = add_new_responsible(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'])
+        if 'resp_id' in self.request.data:
+            resp = CustomUser.objects.get(id=self.request.data['resp_id'])
         if 'exec_name' in self.request.data:
             for executor in self.request.data['exec_name']:
                 name = executor.split(' ')
                 executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk']))
+        if 'exec_id' in self.request.data:
+            for executor in self.request.data['exec_id']:
+                executors.append(CustomUser.objects.get(id=executor))
         serializer.save(board_id=self.kwargs['pk'], icon=icon, so_executors=executors, responsible=resp)
 
 

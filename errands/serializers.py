@@ -113,6 +113,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     icon = serializers.SerializerMethodField('get_icon_description')
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
+    project = serializers.SerializerMethodField('get_project')
 
     class Meta:
         model = Tasks
@@ -129,6 +130,10 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     def get_resp_id(self, obj):
         if obj.responsible:
             return obj.responsible.id
+
+    def get_project(self, obj):
+        if obj.project:
+            return obj.project.title
 
 
 class TaskUpdateSerializer(serializers.ModelSerializer):

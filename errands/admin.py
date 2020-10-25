@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Boards, Tasks, Icons
+from .models import Boards, Tasks, Icons, Project
 
 
 class FriendInlineAdmin(admin.TabularInline):
@@ -19,4 +19,9 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Icons)
 class IconAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Project)
+class ProjectAdmin(admin.ModelAdmin):
     pass

@@ -60,6 +60,17 @@ post_save.connect(journal_save_handler, sender=Icons)
 post_delete.connect(journal_delete_handler, sender=Icons)
 
 
+class Project(models.Model):
+    title = models.CharField('Проект', max_length=100, default='', blank=True)
+
+    class Meta:
+        verbose_name = 'Проект'
+        verbose_name_plural = 'Проекты'
+
+    def __str__(self):
+        return self.title
+
+
 class Tasks(ChangeloggableMixin, models.Model):
     STATUS = (
         ('В работе', 'В работе'),
@@ -72,7 +83,8 @@ class Tasks(ChangeloggableMixin, models.Model):
     text = models.TextField('Текст задачи', blank=True, default='')
     term = models.DateTimeField('Срок', auto_now=False, blank=True, null=True)
     status = models.CharField('Статус', max_length=25, choices=STATUS, default='В работе')
-    project = models.CharField('Проект', max_length=100, default='', blank=True)
+    project = models.ForeignKey(Project, on_delete=models.PROTECT, blank=True, null=True, verbose_name='Проект',
+                                related_name='project_tasks')
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks', verbose_name='Доска', blank=True,
                               null=True)
     responsible = models.ForeignKey(CustomUser, on_delete=models.PROTECT, related_name='responsible',
@@ -87,6 +99,7 @@ class Tasks(ChangeloggableMixin, models.Model):
     class Meta:
         verbose_name = 'Задача'
         verbose_name_plural = 'Задачи'
+        ordering = ('-id',)
 
     def __str__(self):
         return self.title

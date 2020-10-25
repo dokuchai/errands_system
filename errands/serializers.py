@@ -4,8 +4,8 @@ from django.db.models import F
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks, Icons, FriendBoardPermission
-from .services import add_new_responsible
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
+from .services import add_new_responsible, add_new_user
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class SoExecutorSerializer(serializers.ModelSerializer):
         fields = ('id', 'full_name')
 
     def get_full_name(self, obj):
-        return f'{obj.first_name} {obj.last_name}'
+        return f'{obj.last_name} {obj.first_name}'
 
 
 class BoardFriendSerializer(serializers.ModelSerializer):
@@ -36,13 +36,14 @@ class BoardFriendSerializer(serializers.ModelSerializer):
         fields = ('id', 'first_name', 'last_name', 'full_name', 'redactor')
 
     def get_full_name(self, obj):
-        return f'{obj.friend.first_name} {obj.friend.last_name}'
+        return f'{obj.friend.last_name} {obj.friend.first_name}'
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     icon = serializers.SerializerMethodField("get_icon_url")
     so_executors = SoExecutorSerializer(many=True, read_only=True)
+    project = serializers.CharField(default='')
 
     class Meta:
         model = Tasks
@@ -59,6 +60,7 @@ class TaskListSerializer(serializers.ModelSerializer):
     icon = serializers.SerializerMethodField("get_icon_url")
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
+    project = serializers.SerializerMethodField('get_project')
 
     class Meta:
         model = Tasks
@@ -70,7 +72,35 @@ class TaskListSerializer(serializers.ModelSerializer):
 
     def get_responsible_name(self, obj):
         if obj.responsible:
-            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
+            return f'{obj.responsible.last_name} {obj.responsible.first_name}'
+
+    def get_resp_id(self, obj):
+        if obj.responsible:
+            return obj.responsible.id
+
+    def get_project(self, obj):
+        if obj.project:
+            return obj.project.title
+
+
+class TaskListWithoutProjectSerializer(serializers.ModelSerializer):
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    responsible = serializers.SerializerMethodField('get_responsible_name')
+    icon = serializers.SerializerMethodField("get_icon_url")
+    resp_id = serializers.SerializerMethodField('get_resp_id')
+    so_executors = SoExecutorSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Tasks
+        fields = ('id', 'title', 'status', 'term', 'responsible', 'icon', 'board', 'resp_id', 'so_executors')
+
+    def get_icon_url(self, obj):
+        if obj.icon:
+            return obj.icon.image.url
+
+    def get_responsible_name(self, obj):
+        if obj.responsible:
+            return f'{obj.responsible.last_name} {obj.responsible.first_name}'
 
     def get_resp_id(self, obj):
         if obj.responsible:
@@ -90,7 +120,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     def get_responsible_name(self, obj):
         if obj.responsible:
-            return f'{obj.responsible.first_name} {obj.responsible.last_name}'
+            return f'{obj.responsible.last_name} {obj.responsible.first_name}'
 
     def get_icon_description(self, obj):
         if obj.icon:
@@ -108,20 +138,22 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     name = serializers.CharField(default='')
     resp_id = serializers.CharField(default='')
+    project = serializers.CharField(default='')
+    exec_id = serializers.ListField(default=[])
+    exec_name = serializers.ListField(default=[])
 
     class Meta:
         model = Tasks
         fields = (
             'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'name', 'so_executors',
-            'resp_id')
+            'resp_id', 'exec_id', 'exec_name')
 
     def update(self, instance, validated_data):
         instance.title = validated_data.get('title', instance.title)
         instance.text = validated_data.get('text', instance.text)
-        instance.project = validated_data.get('project', instance.project)
         instance.term = validated_data.get('term', instance.term)
         instance.status = validated_data.get('status', instance.status)
-        icon = validated_data.pop('icon', None)
+        icon, executors = validated_data.pop('icon', None), []
         try:
             instance.icon = Icons.objects.get(description=icon['description'])
         except Icons.DoesNotExist:
@@ -138,10 +170,33 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                 instance.responsible = None
         if 'name' in validated_data:
             name = str(validated_data['name']).split(' ')
-            responsible = add_new_responsible(first_name=name[1], last_name=name[0], board_id=instance.board.id)
+            responsible = add_new_responsible(first_name=name[0], last_name=name[1], board_id=instance.board.id)
             instance.responsible = responsible
+        if 'project' in validated_data:
+            project, created = Project.objects.get_or_create(title=validated_data['project'])
+            instance.project = project
+        if 'exec_name' in validated_data:
+            for executor in validated_data['exec_name']:
+                name = executor.split(' ')
+                if len(name) == 1:
+                    executors.append(add_new_user(first_name=name[0], last_name='', board_id=instance.board.id))
+                elif len(name) == 2:
+                    executors.append(add_new_user(first_name=name[0], last_name=name[1], board_id=instance.board.id))
+        if 'exec_id' in validated_data:
+            for executor in validated_data['exec_id']:
+                executors.append(CustomUser.objects.get(id=executor))
+        instance.so_executors.add(*executors)
         instance.save()
         return instance
+
+
+class ProjectsSerializer(serializers.ModelSerializer):
+    project = serializers.CharField(source='title')
+    tasks = TaskListSerializer(many=True, source='project_tasks')
+
+    class Meta:
+        model = Project
+        fields = ('project', 'tasks')
 
 
 class BoardSerializer(serializers.ModelSerializer):
@@ -154,51 +209,26 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
-        [project.update(
-            {"tasks": TaskListSerializer(Tasks.objects.filter(project=project["project"]).order_by('-id'), many=True,
-                                         read_only=True).data}) for project in projects]
-        tasks = Tasks.objects.filter(board=instance, project="").order_by('-id').values('id', 'title', 'status', 'term',
-                                                                                        'icon', 'board', 'responsible',
-                                                                                        resp_id=F('responsible_id'))
-        [task.update({"responsible":
-                          BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[
-                              'full_name']}) for task in tasks if task['responsible']]
-        [task.update(
-            {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
-            task in tasks if task['icon']]
-        [task.update(
-            {"so_executors": SoExecutorSerializer(CustomUser.objects.filter(so_executors=task['id']), many=True).data})
-            for task in tasks]
+        projects = Project.objects.filter(project_tasks__board_id=instance.id)
+        tasks = Tasks.objects.filter(board=instance, project=None).order_by('-id').annotate(resp_id=F('responsible_id'))
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": [project for project in projects],
-            "tasks": [task for task in tasks]
+            "projects": ProjectsSerializer(projects, many=True).data,
+            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }
 
 
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Tasks.objects.filter(board=instance).exclude(project="").distinct().values("project")
-        [project.update(
-            {"tasks": TaskListSerializer(
-                Tasks.objects.filter(project=project["project"], status__in=('В работе', 'Требуется помощь')).order_by(
-                    '-id'), many=True, read_only=True).data}) for project in projects]
-        tasks = Tasks.objects.filter(board=instance, project="", status__in=('В работе', 'Требуется помощь')).order_by(
-            '-id').values('id', 'title', 'status', 'term', 'icon', 'board', 'responsible', resp_id=F('responsible_id'))
-        [task.update({"responsible":
-                          BoardFriendSerializer(FriendBoardPermission.objects.get(friend_id=task['responsible'])).data[
-                              'full_name']}) for task in tasks if task['responsible']]
-        [task.update(
-            {"icon": IconSerializer(Icons.objects.get(id=task['icon'])).data['image']}) for
-            task in tasks if task['icon']]
-        [task.update(
-            {"so_executors": SoExecutorSerializer(CustomUser.objects.filter(so_executors=task['id']), many=True).data})
-            for task in tasks]
+        projects = Project.objects.filter(project_tasks__board_id=instance.id,
+                                          project_tasks__status__in=('В работе', 'Требуется помощь'))
+        tasks = Tasks.objects.filter(board=instance, project=None,
+                                     status__in=('В работе', 'Требуется помощь')).order_by('-id').annotate(
+            resp_id=F('responsible_id'))
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": [project for project in projects if project['tasks']],
-            "tasks": [task for task in tasks]
+            "projects": ProjectsSerializer(projects, many=True).data,
+            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }

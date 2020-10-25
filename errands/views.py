@@ -6,8 +6,8 @@ from rest_framework.views import APIView
 
 from users.models import CustomUser
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
-                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, SoExecutorSerializer,
-                          TaskCreateSerializer, BoardActiveTasksSerializer, ProjectsSerializer)
+                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
+                          TaskCreateSerializer, BoardActiveTasksSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
 from .services import add_new_user, add_new_responsible
 

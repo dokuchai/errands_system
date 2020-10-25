@@ -209,7 +209,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Project.objects.filter(project_tasks__board_id=instance.id)
+        projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None).order_by('-id').annotate(resp_id=F('responsible_id'))
         return {
             "id": instance.id,
@@ -222,7 +222,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
         projects = Project.objects.filter(project_tasks__board_id=instance.id,
-                                          project_tasks__status__in=('В работе', 'Требуется помощь'))
+                                          project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,
                                      status__in=('В работе', 'Требуется помощь')).order_by('-id').annotate(
             resp_id=F('responsible_id'))

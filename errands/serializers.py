@@ -43,7 +43,7 @@ class TaskCreateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     icon = serializers.SerializerMethodField("get_icon_url")
     so_executors = SoExecutorSerializer(many=True, read_only=True)
-    project = serializers.CharField(default='')
+    project = serializers.CharField(default='', required=False, allow_blank=True, allow_null=True)
 
     class Meta:
         model = Tasks

@@ -69,7 +69,7 @@ class TaskCreateView(CreateAPIView):
                 icon = Icons.objects.get(description=self.request.data['icon'])
             except Icons.DoesNotExist:
                 pass
-        if 'resp_name' in self.request.data:
+        if 'resp_name' in self.request.data and self.request.data['resp_name'] != '':
             name = str(self.request.data['resp_name']).split(' ')
             if len(name) == 1:
                 resp = add_new_responsible(first_name=name[1], last_name='', board_id=self.kwargs['pk'])

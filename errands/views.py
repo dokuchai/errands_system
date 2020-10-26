@@ -77,14 +77,14 @@ class TaskCreateView(CreateAPIView):
                 resp = add_new_responsible(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'])
         if 'resp_id' in self.request.data:
             resp = CustomUser.objects.get(id=self.request.data['resp_id'])
-        if 'exec_name' in self.request.data:
+        if 'exec_name' in self.request.data and self.request.data['exec_name']:
             for executor in self.request.data['exec_name']:
                 name = executor.split(' ')
                 if len(name) == 1:
                     executors.append(add_new_user(first_name=name[1], last_name='', board_id=self.kwargs['pk']))
                 elif len(name) == 2:
                     executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk']))
-        if 'exec_id' in self.request.data:
+        if 'exec_id' in self.request.data and self.request.data['exec_id']:
             for executor in self.request.data['exec_id']:
                 executors.append(CustomUser.objects.get(id=executor))
         if 'project' in self.request.data:

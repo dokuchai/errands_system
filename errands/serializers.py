@@ -220,6 +220,19 @@ class ProjectsSerializer(serializers.ModelSerializer):
         fields = ('project', 'tasks')
 
 
+class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
+    project = serializers.CharField(source='title')
+    tasks = serializers.SerializerMethodField('get_active_tasks')
+
+    class Meta:
+        model = Project
+        fields = ('project', 'tasks')
+
+    def get_active_tasks(self, obj):
+        tasks = Tasks.objects.filter(project=obj, status__in=('В работе', 'Требуется помощь'))
+        return TaskListSerializer(tasks, many=True).data
+
+
 class BoardSerializer(serializers.ModelSerializer):
     tasks = TaskListSerializer(many=True)
 
@@ -250,6 +263,6 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": ProjectsSerializer(projects, many=True).data,
+            "projects": ProjectsWithActiveTasksSerializer(projects, many=True).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }

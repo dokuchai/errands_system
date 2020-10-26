@@ -236,7 +236,7 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
 class BoardSerializer(serializers.ModelSerializer):
     class Meta:
         model = Boards
-        fields = ('id', 'title',)
+        fields = ('id', 'title', 'status')
 
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):

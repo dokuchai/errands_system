@@ -141,7 +141,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                                      required=False)
     icon = serializers.CharField(source='icon.description', allow_null=True, required=False)
     so_executors = SoExecutorSerializer(many=True, read_only=True)
-    name = serializers.CharField(default='')
+    name = serializers.CharField(default='', allow_null=True, allow_blank=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
     resp_id = serializers.CharField(default='')
     project = serializers.CharField(default='')
@@ -234,11 +234,9 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
-    tasks = TaskListSerializer(many=True)
-
     class Meta:
         model = Boards
-        fields = ('id', 'title', 'tasks')
+        fields = ('id', 'title',)
 
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):

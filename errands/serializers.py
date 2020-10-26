@@ -179,15 +179,15 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             else:
                 instance.responsible = None
         if 'name' in validated_data:
-            name = str(validated_data['name']).split(' ')
             responsible = None
+            name = str(validated_data['name']).split(' ')
             if len(name) == 2:
                 try:
                     responsible = CustomUser.objects.get(first_name=name[1], last_name=name[0],
                                                          friend_board=instance.board)
                 except CustomUser.DoesNotExist:
                     responsible = add_new_responsible(first_name=name[1], last_name=name[0], board_id=instance.board.id)
-            elif len(name) == 1:
+            elif len(name) == 1 and name[0] != '':
                 try:
                     responsible = CustomUser.objects.get(first_name=name[0], last_name='', friend_board=instance.board)
                 except CustomUser.DoesNotExist:

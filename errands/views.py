@@ -17,6 +17,11 @@ class IconsListView(ListAPIView):
     serializer_class = IconSerializer
 
 
+class BoardsListView(ListAPIView):
+    queryset = Boards.objects.all()
+    serializer_class = BoardSerializer
+
+
 class BoardRetrieveUpdateView(viewsets.ModelViewSet):
     queryset = Boards.objects.all()
     permission_classes = [IsAuthenticated]

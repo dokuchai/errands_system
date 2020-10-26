@@ -1,3 +1,4 @@
+import requests
 from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -122,3 +123,26 @@ class DeleteExecutorView(APIView):
             return Response({"message": "Пользователя не существует!"}, status=status.HTTP_400_BAD_REQUEST)
         except Tasks.DoesNotExist:
             return Response({"message": "Задачи не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ISUView(APIView):
+    def post(self, request):
+        date = request.data['date']
+        url = f"http://10.248.23.152/api/get-ambulance-messages?date={date}"
+
+        payload = {}
+        headers = {}
+
+        response = requests.request("GET", url, headers=headers, data=payload)
+        content = dict(response.json())
+        death_escalation = content['data']['death_escalation']
+        if death_escalation:
+            task_isu = death_escalation[0]
+            board = Boards.objects.get(owner__position__icontains=task_isu['recipient'])
+            project, proj_created = Project.objects.get_or_create(title='Смертность')
+            responsible = CustomUser.objects.get(position__icontains=task_isu['recipient'], boards=board)
+            task, created = Tasks.objects.get_or_create(title=task_isu['title'], term=task_isu['deadline'],
+                                                        text=task_isu['message'], responsible=responsible, board=board,
+                                                        project=project)
+            return Response(TaskDetailSerializer(task).data, status=status.HTTP_201_CREATED)
+        return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)

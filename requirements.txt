@@ -10,4 +10,5 @@ pkg-resources==0.0.0
 psycopg2-binary==2.8.6
 PyJWT==1.7.1
 pytz==2020.1
+requests
 sqlparse==0.3.1

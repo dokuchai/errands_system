@@ -14,7 +14,7 @@ class BoardAdmin(admin.ModelAdmin):
 
 @admin.register(Tasks)
 class TaskAdmin(admin.ModelAdmin):
-    pass
+    list_display = ('title', 'board')
 
 
 @admin.register(Icons)

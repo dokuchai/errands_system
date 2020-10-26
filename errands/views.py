@@ -141,7 +141,7 @@ class ISUView(APIView):
             board = Boards.objects.get(owner__position__icontains=task_isu['recipient'])
             project, proj_created = Project.objects.get_or_create(title='Смертность')
             responsible = CustomUser.objects.get(position__icontains=task_isu['recipient'], boards=board)
-            task, created = Tasks.objects.get_or_create(title=task_isu['title'], term=task_isu['deadline'],
+            task, created = Tasks.objects.get_or_create(title=task_isu['message'], term=task_isu['deadline'],
                                                         text=task_isu['message'], responsible=responsible, board=board,
                                                         project=project)
             return Response(TaskDetailSerializer(task).data, status=status.HTTP_201_CREATED)

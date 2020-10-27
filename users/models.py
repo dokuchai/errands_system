@@ -15,7 +15,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField('Фамилия', max_length=30, blank=True, default='')
     father_name = models.CharField('Отчество', max_length=20, blank=True, default='')
     subdivision = models.CharField('Подразделение', max_length=100, blank=True, default='')
-    position = models.CharField('Должность', max_length=50, blank=True, default='')
+    position = models.CharField('Должность', max_length=200, blank=True, default='')
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []

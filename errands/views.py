@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
-                          TaskCreateSerializer, BoardActiveTasksSerializer)
+                          TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
 from .services import add_new_user, add_new_responsible
 
@@ -126,23 +126,23 @@ class DeleteExecutorView(APIView):
 
 
 class ISUView(APIView):
-    def post(self, request):
+    def post(self, request, pk):
         date = request.data['date']
         url = f"http://10.248.23.152/api/get-ambulance-messages?date={date}"
-
         payload = {}
         headers = {}
-
         response = requests.request("GET", url, headers=headers, data=payload)
         content = dict(response.json())
         death_escalation = content['data']['death_escalation']
+        board = Boards.objects.get(id=pk)
+        tasks = []
         if death_escalation:
-            task_isu = death_escalation[0]
-            board = Boards.objects.get(owner__position__icontains=task_isu['recipient'])
-            project, proj_created = Project.objects.get_or_create(title='Смертность')
-            responsible = CustomUser.objects.get(position__icontains=task_isu['recipient'], boards=board)
-            task, created = Tasks.objects.get_or_create(title=task_isu['message'], term=task_isu['deadline'],
-                                                        text=task_isu['message'], responsible=responsible, board=board,
-                                                        project=project)
-            return Response(TaskDetailSerializer(task).data, status=status.HTTP_201_CREATED)
+            for task_isu in death_escalation:
+                if board.owner.position.lower().startswith(task_isu['recipient'].lower()):
+                    project, proj_created = Project.objects.get_or_create(title='ИСУ')
+                    responsible = CustomUser.objects.get(position__icontains=board.owner.position, boards=board)
+                    task, created = Tasks.objects.get_or_create(title=task_isu['message'], term=task_isu['deadline'],
+                                                                responsible=responsible, board=board, project=project)
+                    tasks.append(task)
+            return Response(TaskListSerializer(tasks, many=True).data, status=status.HTTP_201_CREATED)
         return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)

@@ -25,7 +25,7 @@ post_delete.connect(journal_delete_handler, sender=FriendBoardPermission)
 
 class Boards(ChangeloggableMixin, models.Model):
     STATUS = (('Личная', 'Личная'), ('Для друзей', 'Для друзей'), ('Общая', 'Общая'))
-    title = models.CharField('Название', max_length=50)
+    title = models.CharField('Название', max_length=250)
     status = models.CharField('Статус', max_length=10, choices=STATUS, default='Общая')
     history = models.DateTimeField('История', auto_now_add=True)
     owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='boards', verbose_name='Владелец')

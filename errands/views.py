@@ -10,7 +10,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
-from .services import add_new_user, add_new_responsible
+from .services import add_new_user, add_new_responsible, get_month
 
 
 class IconsListView(ListAPIView):
@@ -136,14 +136,15 @@ class ISUView(APIView):
         death_escalation = content['data']['death_escalation']
         board = Boards.objects.get(id=pk)
         tasks = []
+        month = str(request.data['date']).split('-')[1]
         if death_escalation:
+            project, proj_created = Project.objects.get_or_create(title=f'ИСУ {get_month(month)}')
             recipients_list = set([task_isu['recipient'] for task_isu in death_escalation])
             recipient_set = (set(map(lambda x: board.owner.position.lower().startswith(x.lower()), recipients_list)))
             if True not in recipient_set:
                 return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
             for task_isu in death_escalation:
                 if board.owner.position.lower().startswith(task_isu['recipient'].lower()):
-                    project, proj_created = Project.objects.get_or_create(title='ИСУ')
                     responsible = CustomUser.objects.get(position__icontains=board.owner.position, boards=board)
                     task, created = Tasks.objects.get_or_create(title=task_isu['message'], term=task_isu['deadline'],
                                                                 responsible=responsible, board=board, project=project)

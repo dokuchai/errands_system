@@ -25,3 +25,9 @@ def add_new_user(first_name, last_name, board_id, task=None, serializer=None):
 def add_new_responsible(first_name, last_name, board_id):
     user = create_user_and_append_him_to_board_friend(first_name, last_name, board_id)
     return user
+
+
+def get_month(number):
+    months = {"01": "Январь", "02": "Февраль", "03": "Март", "04": "Апрель", "05": "Май", "06": "Июнь", "07": "Июль",
+              "08": "Август", "09": "Сентябрь", "10": "Октябрь", "11": "Ноябрь", "12": "Декабрь"}
+    return months[number]

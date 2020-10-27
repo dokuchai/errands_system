@@ -137,6 +137,10 @@ class ISUView(APIView):
         board = Boards.objects.get(id=pk)
         tasks = []
         if death_escalation:
+            recipients_list = set([task_isu['recipient'] for task_isu in death_escalation])
+            recipient_set = (set(map(lambda x: board.owner.position.lower().startswith(x.lower()), recipients_list)))
+            if True not in recipient_set:
+                return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
             for task_isu in death_escalation:
                 if board.owner.position.lower().startswith(task_isu['recipient'].lower()):
                     project, proj_created = Project.objects.get_or_create(title='ИСУ')

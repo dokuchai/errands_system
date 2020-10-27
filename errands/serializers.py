@@ -213,11 +213,15 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
 
 class ProjectsSerializer(serializers.ModelSerializer):
     project = serializers.CharField(source='title')
-    tasks = TaskListSerializer(many=True, source='project_tasks')
+    tasks = serializers.SerializerMethodField('get_tasks')
 
     class Meta:
         model = Project
         fields = ('project', 'tasks')
+
+    def get_tasks(self, obj):
+        tasks = Tasks.objects.filter(project=obj, board_id=self.context['board'])
+        return TaskListSerializer(tasks, many=True).data
 
 
 class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
@@ -229,7 +233,8 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
         fields = ('project', 'tasks')
 
     def get_active_tasks(self, obj):
-        tasks = Tasks.objects.filter(project=obj, status__in=('В работе', 'Требуется помощь'))
+        tasks = Tasks.objects.filter(project=obj, status__in=('В работе', 'Требуется помощь'),
+                                     board_id=self.context['board'])
         return TaskListSerializer(tasks, many=True).data
 
 
@@ -246,14 +251,14 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": ProjectsSerializer(projects, many=True).data,
+            "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }
 
 
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Project.objects.filter(project_tasks__board_id=instance.id,
+        projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,
                                      status__in=('В работе', 'Требуется помощь')).order_by('-id').annotate(
@@ -261,6 +266,6 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
-            "projects": ProjectsWithActiveTasksSerializer(projects, many=True).data,
+            "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }

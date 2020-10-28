@@ -135,21 +135,41 @@ class ISUView(APIView):
         response = requests.request("GET", url, headers=headers, data=payload)
         content = dict(response.json())
         death_escalation = content['data']['death_escalation']
+        ambulances = content['data']['ambulance']
         board = Boards.objects.get(id=pk)
         tasks = []
         month = str(request.data['date']).split('-')[1]
         year = datetime.datetime.today().year
+        project, proj_created = Project.objects.get_or_create(title=f'ИСУ {get_month(month)},{year}')
+        responsible = CustomUser.objects.get(first_name=board.owner.first_name,
+                                             last_name=board.owner.last_name,
+                                             father_name=board.owner.father_name, boards=board)
+        responsible_full_name = f"{responsible.last_name} {responsible.first_name} {responsible.father_name}"
+        if ambulances:
+            recipients_fio_set = set(
+                [f'{ambulance["last_name"]} {ambulance["first_name"]} {ambulance["father_name"]}' for ambulance in
+                 ambulances])
+            if f'{board.owner.last_name} {board.owner.first_name} {board.owner.father_name}' in recipients_fio_set:
+                for ambulance in ambulances:
+                    full_name = f"{ambulance['last_name']} {ambulance['first_name']} {ambulance['father_name']}"
+                    if responsible_full_name == full_name:
+                        task, created = Tasks.objects.get_or_create(title=ambulance['title'], board=board,
+                                                                    term=ambulance['deadline'], project=project,
+                                                                    responsible=responsible)
+                        tasks.append(task)
         if death_escalation:
-            project, proj_created = Project.objects.get_or_create(title=f'ИСУ {get_month(month)},{year}')
-            recipients_list = set([task_isu['recipient'] for task_isu in death_escalation])
-            recipient_set = (set(map(lambda x: board.owner.position.lower().startswith(x.lower()), recipients_list)))
-            if True not in recipient_set:
-                return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
-            for task_isu in death_escalation:
-                if board.owner.position.lower().startswith(task_isu['recipient'].lower()):
-                    responsible = CustomUser.objects.get(position__icontains=board.owner.position, boards=board)
-                    task, created = Tasks.objects.get_or_create(title=task_isu['message'], term=task_isu['deadline'],
-                                                                responsible=responsible, board=board, project=project)
-                    tasks.append(task)
+            recipients_fio_set = set(
+                [f'{task_isu["last_name"]} {task_isu["first_name"]} {task_isu["father_name"]}' for task_isu in
+                 death_escalation])
+            if f'{board.owner.last_name} {board.owner.first_name} {board.owner.father_name}' in recipients_fio_set:
+                for task_isu in death_escalation:
+                    full_name = f"{task_isu['last_name']} {task_isu['first_name']} {task_isu['father_name']}"
+                    if responsible_full_name == full_name:
+                        task, created = Tasks.objects.get_or_create(title=task_isu['message'], project=project,
+                                                                    term=task_isu['deadline'], board=board,
+                                                                    responsible=responsible)
+                        tasks.append(task)
+        if tasks:
             return Response(TaskListSerializer(tasks, many=True).data, status=status.HTTP_201_CREATED)
-        return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)

@@ -141,7 +141,7 @@ class ISUView(APIView):
         tasks = []
         month = str(request.data['date']).split('-')[1]
         year = datetime.datetime.today().year
-        day = datetime.datetime.today().day
+        day = str(request.data['date']).split('-')[2]
         project, proj_created = Project.objects.get_or_create(title=f'ИСУ, {day} {get_month(month)} {year}')
         responsible = CustomUser.objects.get(first_name=board.owner.first_name,
                                              last_name=board.owner.last_name,

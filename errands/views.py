@@ -136,11 +136,13 @@ class ISUView(APIView):
         content = dict(response.json())
         death_escalation = content['data']['death_escalation']
         ambulances = content['data']['ambulance']
+        test_output = content['data']['test_output']
         board = Boards.objects.get(id=pk)
         tasks = []
         month = str(request.data['date']).split('-')[1]
         year = datetime.datetime.today().year
-        project, proj_created = Project.objects.get_or_create(title=f'ИСУ {get_month(month)},{year}')
+        day = datetime.datetime.today().day
+        project, proj_created = Project.objects.get_or_create(title=f'ИСУ, {day} {get_month(month)} {year}')
         responsible = CustomUser.objects.get(first_name=board.owner.first_name,
                                              last_name=board.owner.last_name,
                                              father_name=board.owner.father_name, boards=board)
@@ -167,6 +169,17 @@ class ISUView(APIView):
                     if responsible_full_name == full_name:
                         task, created = Tasks.objects.get_or_create(title=task_isu['message'], project=project,
                                                                     term=task_isu['deadline'], board=board,
+                                                                    responsible=responsible)
+                        tasks.append(task)
+        if test_output:
+            recipients_fio_set = set(
+                [f'{t_o["last_name"]} {t_o["first_name"]} {t_o["father_name"]}' for t_o in test_output])
+            if f'{board.owner.last_name} {board.owner.first_name} {board.owner.father_name}' in recipients_fio_set:
+                for t_o in test_output:
+                    full_name = f"{t_o['last_name']} {t_o['first_name']} {t_o['father_name']}"
+                    if responsible_full_name == full_name:
+                        task, created = Tasks.objects.get_or_create(title=t_o['message'], project=project,
+                                                                    term=t_o['deadline'], board=board,
                                                                     responsible=responsible)
                         tasks.append(task)
         if tasks:

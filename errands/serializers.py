@@ -239,6 +239,8 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
 
 
 class BoardSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(required=False)
+
     class Meta:
         model = Boards
         fields = ('id', 'title', 'status')

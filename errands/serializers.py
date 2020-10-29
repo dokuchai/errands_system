@@ -253,6 +253,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
+            "status": instance.status,
             "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }
@@ -268,6 +269,7 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         return {
             "id": instance.id,
             "title": instance.title,
+            "status": instance.status,
             "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }

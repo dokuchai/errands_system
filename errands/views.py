@@ -153,7 +153,7 @@ class ISUView(APIView):
                 for ambulance in ambulances:
                     full_name = f"{ambulance['last_name']} {ambulance['first_name']} {ambulance['father_name']}"
                     if responsible_full_name == full_name:
-                        task, created = Tasks.objects.get_or_create(title=ambulance['title'], board=board,
+                        task, created = Tasks.objects.get_or_create(title=ambulance['message'], board=board,
                                                                     term=ambulance['deadline'], project=project,
                                                                     responsible=responsible)
                         tasks.append(task)

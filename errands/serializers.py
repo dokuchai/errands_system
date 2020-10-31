@@ -144,7 +144,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     name = serializers.CharField(default='', allow_null=True, allow_blank=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
     resp_id = serializers.CharField(default='')
-    project = serializers.CharField(default='')
+    project = serializers.CharField(default=None, required=False, allow_null=True, allow_blank=True)
     exec_id = serializers.ListField(default=[])
     exec_name = serializers.ListField(default=[])
 

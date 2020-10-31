@@ -194,8 +194,11 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                     responsible = add_new_responsible(first_name=name[0], last_name='', board_id=instance.board.id)
             instance.responsible = responsible
         if 'project' in validated_data:
-            project, created = Project.objects.get_or_create(title=validated_data['project'])
-            instance.project = project
+            if validated_data['project'] == 'null' or validated_data['project'] == '':
+                instance.project = None
+            else:
+                project, created = Project.objects.get_or_create(title=validated_data['project'])
+                instance.project = project
         if 'exec_name' in validated_data:
             for executor in validated_data['exec_name']:
                 name = executor.split(' ')

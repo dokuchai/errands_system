@@ -223,7 +223,8 @@ class ProjectsSerializer(serializers.ModelSerializer):
         fields = ('project', 'tasks')
 
     def get_tasks(self, obj):
-        tasks = Tasks.objects.filter(project=obj, board_id=self.context['board'])
+        tasks = Tasks.objects.filter(project=obj, board_id=self.context['board']).order_by(
+            F('term').asc(nulls_last=True))
         return TaskListSerializer(tasks, many=True).data
 
 
@@ -237,7 +238,7 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
 
     def get_active_tasks(self, obj):
         tasks = Tasks.objects.filter(project=obj, status__in=('В работе', 'Требуется помощь'),
-                                     board_id=self.context['board'])
+                                     board_id=self.context['board']).order_by(F('term').asc(nulls_last=True))
         return TaskListSerializer(tasks, many=True).data
 
 
@@ -252,7 +253,7 @@ class BoardSerializer(serializers.ModelSerializer):
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
         projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
-        tasks = Tasks.objects.filter(board=instance, project=None).order_by('-id').annotate(resp_id=F('responsible_id'))
+        tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
         return {
             "id": instance.id,
             "title": instance.title,
@@ -267,8 +268,8 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,
-                                     status__in=('В работе', 'Требуется помощь')).order_by('-id').annotate(
-            resp_id=F('responsible_id'))
+                                     status__in=('В работе', 'Требуется помощь')).order_by(
+            F('term').asc(nulls_last=True))
         return {
             "id": instance.id,
             "title": instance.title,

@@ -140,8 +140,7 @@ class ISUView(APIView):
         tasks = []
         project_death, project_death_created = Project.objects.get_or_create(title='Смертность')
         project_ambulance, project_ambulance_created = Project.objects.get_or_create(title='Скорая')
-        responsible = CustomUser.objects.get(first_name=board.owner.first_name,
-                                             last_name=board.owner.last_name,
+        responsible = CustomUser.objects.get(first_name=board.owner.first_name, last_name=board.owner.last_name,
                                              father_name=board.owner.father_name, boards=board)
         responsible_full_name = f"{responsible.last_name} {responsible.first_name} {responsible.father_name}"
         if ambulances:
@@ -154,6 +153,6 @@ class ISUView(APIView):
             get_or_create_isu_tasks(items=test_output, board=board, responsible_full_name=responsible_full_name,
                                     tasks=tasks, project=project_death, responsible=responsible)
         if tasks:
-            return Response({"message": f"Найдено {len(tasks)} задач!"}, status=status.HTTP_201_CREATED)
+            return Response(TaskListSerializer(tasks, many=True).data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)

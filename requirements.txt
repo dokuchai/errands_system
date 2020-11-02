@@ -6,7 +6,6 @@ djangorestframework==3.11.1
 djangorestframework-simplejwt==4.4.0
 djoser==2.0.5
 Pillow==7.2.0
-pkg-resources==0.0.0
 psycopg2-binary==2.8.6
 PyJWT==1.7.1
 pytz==2020.1

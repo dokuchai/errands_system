@@ -1,12 +1,13 @@
+import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'jq$th4v@yq*20)!x=838l2%_^4*ztx=v6nh9)^-cs(h0xh&wi1'
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
-DEBUG = True
+DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS").split()
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -59,12 +60,12 @@ WSGI_APPLICATION = 'errands_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'errands_system',
-        'USER': 'stars_user',
-        'PASSWORD': '123',
-        'HOST': 'localhost',
-        'PORT': '',
+        "ENGINE": os.environ.get("SQL_ENGINE"),
+        "NAME": os.environ.get("SQL_DATABASE"),
+        "USER": os.environ.get("SQL_USER"),
+        "PASSWORD": os.environ.get("SQL_PASSWORD"),
+        "HOST": os.environ.get("SQL_HOST"),
+        "PORT": os.environ.get("SQL_PORT"),
     }
 }
 AUTH_USER_MODEL = 'users.CustomUser'

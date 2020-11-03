@@ -128,7 +128,7 @@ class DeleteExecutorView(APIView):
 class ISUView(APIView):
     def post(self, request, pk):
         date = request.data['date']
-        url = f"http://10.248.23.152/api/get-ambulance-messages?date={date}"
+        url = f"http://isu,api.test/api/get-ambulance-messages?date={date}"
         payload = {}
         headers = {}
         response = requests.request("GET", url, headers=headers, data=payload)

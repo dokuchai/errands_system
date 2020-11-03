@@ -131,7 +131,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     def get_icon_image(self, obj):
         if obj.icon:
-            return obj.icon.image
+            return obj.icon.image.url
 
     def get_resp_id(self, obj):
         if obj.responsible:

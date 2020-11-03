@@ -111,13 +111,15 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
     icon = serializers.SerializerMethodField('get_icon_description')
+    icon_url = serializers.SerializerMethodField('get_icon_image')
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'resp_id', 'so_executors')
+        fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
+                  'so_executors')
 
     def get_responsible_name(self, obj):
         if obj.responsible:
@@ -126,6 +128,10 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     def get_icon_description(self, obj):
         if obj.icon:
             return obj.icon.description
+
+    def get_icon_image(self, obj):
+        if obj.icon:
+            return obj.icon.image
 
     def get_resp_id(self, obj):
         if obj.responsible:

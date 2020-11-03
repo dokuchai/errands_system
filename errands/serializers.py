@@ -140,6 +140,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], allow_null=True,
                                      required=False)
     icon = serializers.CharField(source='icon.description', allow_null=True, required=False)
+    icon_url = serializers.CharField(source='icon.image.url', required=False)
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     name = serializers.CharField(default='', allow_null=True, allow_blank=True)
     responsible = serializers.SerializerMethodField('get_responsible_name')
@@ -151,8 +152,8 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tasks
         fields = (
-            'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'status', 'name', 'so_executors',
-            'resp_id', 'exec_id', 'exec_name')
+            'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status',
+            'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

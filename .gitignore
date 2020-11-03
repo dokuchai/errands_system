@@ -4,4 +4,3 @@
 __pycache__
 *media
 docker-compose.yml
-.env.dev

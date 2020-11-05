@@ -125,6 +125,21 @@ class DeleteExecutorView(APIView):
             return Response({"message": "Задачи не существует!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class DeleteFriendToBoardView(APIView):
+    def post(self, request, pk):
+        try:
+            if FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).exists():
+                FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).delete()
+                return Response({"message": "Друг удален!"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Пользователь не является другом данной доски!"},
+                                status=status.HTTP_400_BAD_REQUEST)
+        except CustomUser.DoesNotExist:
+            return Response({"message": "Пользователя не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+        except Boards.DoesNotExist:
+            return Response({"message": "Доски не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ISUView(APIView):
     def post(self, request, pk):
         date = request.data['date']

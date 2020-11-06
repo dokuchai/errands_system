@@ -230,9 +230,7 @@ class ProjectsSerializer(serializers.ModelSerializer):
         fields = ('project', 'tasks')
 
     def get_tasks(self, obj):
-        tasks = Tasks.objects.select_related('board', 'responsible', 'icon', 'project').filter(project=obj,
-                                                                                               board_id=self.context[
-                                                                                                   'board']).order_by(
+        tasks = Tasks.objects.filter(project=obj, board_id=self.context['board']).order_by(
             F('term').asc(nulls_last=True))
         return TaskListSerializer(tasks, many=True).data
 

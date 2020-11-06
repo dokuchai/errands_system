@@ -45,7 +45,7 @@ post_delete.connect(journal_delete_handler, sender=Boards)
 
 
 class Icons(ChangeloggableMixin, models.Model):
-    image = models.ImageField('Иконка', upload_to='icons/')
+    image = models.FileField('Иконка', upload_to='icons/')
     description = models.CharField('Описание', max_length=20, default='')
 
     class Meta:

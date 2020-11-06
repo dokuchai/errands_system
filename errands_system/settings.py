@@ -17,6 +17,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users.apps.UsersConfig',
+    'debug_toolbar',
     'rest_framework',
     'rest_framework.authtoken',
     'corsheaders',
@@ -35,6 +36,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'changelog.middleware.LoggedInUserMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'errands_system.urls'
@@ -110,3 +112,7 @@ MEDIA_ROOT = Path.joinpath(BASE_DIR, "media")
 CORS_ORIGIN_ALLOW_ALL = True
 
 FILE_UPLOAD_PERMISSIONS = 0o757
+INTERNAL_IPS = ['localhost', 'back-missions.admlr.lipetsk.ru']
+DEBUG_TOOLBAR_CONFIG = {
+    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+}

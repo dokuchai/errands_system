@@ -10,3 +10,4 @@ deploy:
     - rsync -r ./ /home/razrab/errands_system/
     - cd /home/razrab/docker/ && docker-compose build && docker-compose up -d
     - docker exec errands_system python manage.py migrate
+    - cd /home/razrab/docker/ && docker-compose build && docker-compose up -d

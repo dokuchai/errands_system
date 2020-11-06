@@ -88,7 +88,8 @@ class TaskCreateView(CreateAPIView):
             for executor in self.request.data['exec_id']:
                 executors.append(CustomUser.objects.get(id=executor))
         if 'project' in self.request.data:
-            project, created = Project.objects.get_or_create(title=self.request.data['project'])
+            if self.request.data['project'] != '':
+                project, created = Project.objects.get_or_create(title=self.request.data['project'])
         serializer.save(board_id=self.kwargs['pk'], icon=icon, so_executors=executors, responsible=resp,
                         project=project)
 

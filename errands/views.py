@@ -36,7 +36,7 @@ class BoardRetrieveUpdateView(viewsets.ModelViewSet):
 
 class BoardTasksActiveView(viewsets.ModelViewSet):
     queryset = Boards.objects.all()
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         if self.action == "retrieve":

@@ -14,7 +14,7 @@ from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks
 
 
 class IconsListView(ListAPIView):
-    queryset = Icons.objects.exclude(description__in=('ИСУ обычная', 'ИСУ предупреждение', 'ИСУ эскалация'))
+    queryset = Icons.objects.all()
     serializer_class = IconSerializer
 
 

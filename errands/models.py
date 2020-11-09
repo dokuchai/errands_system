@@ -19,8 +19,8 @@ class FriendBoardPermission(ChangeloggableMixin, models.Model):
         return f'{self.friend.last_name} {self.friend.first_name} {self.friend.father_name}'
 
 
-post_save.connect(journal_save_handler, sender=FriendBoardPermission)
-post_delete.connect(journal_delete_handler, sender=FriendBoardPermission)
+# post_save.connect(journal_save_handler, sender=FriendBoardPermission)
+# post_delete.connect(journal_delete_handler, sender=FriendBoardPermission)
 
 
 class Boards(ChangeloggableMixin, models.Model):
@@ -40,8 +40,8 @@ class Boards(ChangeloggableMixin, models.Model):
         return self.title
 
 
-post_save.connect(journal_save_handler, sender=Boards)
-post_delete.connect(journal_delete_handler, sender=Boards)
+# post_save.connect(journal_save_handler, sender=Boards)
+# post_delete.connect(journal_delete_handler, sender=Boards)
 
 
 class Icons(ChangeloggableMixin, models.Model):
@@ -56,8 +56,8 @@ class Icons(ChangeloggableMixin, models.Model):
         return self.description
 
 
-post_save.connect(journal_save_handler, sender=Icons)
-post_delete.connect(journal_delete_handler, sender=Icons)
+# post_save.connect(journal_save_handler, sender=Icons)
+# post_delete.connect(journal_delete_handler, sender=Icons)
 
 
 class Project(models.Model):
@@ -105,5 +105,5 @@ class Tasks(ChangeloggableMixin, models.Model):
         return self.title
 
 
-post_save.connect(journal_save_handler, sender=Tasks)
-post_delete.connect(journal_delete_handler, sender=Tasks)
+# post_save.connect(journal_save_handler, sender=Tasks)
+# post_delete.connect(journal_delete_handler, sender=Tasks)

@@ -13,6 +13,16 @@ def create_user_and_append_him_to_board_friend(first_name, last_name, board_id):
     return user
 
 
+def get_or_create_user(first_name, last_name, father_name):
+    domain = get_random_string(length=5).lower()
+    try:
+        user = CustomUser.objects.get(first_name=first_name, last_name=last_name, father_name=father_name)
+    except CustomUser.DoesNotExist:
+        user = CustomUser.objects.create(first_name=first_name, last_name=last_name, father_name=father_name,
+                                         email=f'{domain}@new.com')
+    return user
+
+
 def add_new_user(first_name, last_name, board_id, task=None, serializer=None):
     user = create_user_and_append_him_to_board_friend(first_name=first_name, last_name=last_name, board_id=board_id)
     if task:
@@ -48,6 +58,6 @@ def get_or_create_isu_tasks(items, board, responsible_full_name, tasks, project,
             full_name = f"{item['last_name']} {item['first_name']} {item['father_name']}"
             if responsible_full_name == full_name:
                 task, created = Tasks.objects.get_or_create(title=message_and_icon['message'], board=board,
-                                                            project=project,  responsible=responsible,
+                                                            project=project, responsible=responsible,
                                                             term=item['deadline'], icon_id=message_and_icon['icon'])
                 tasks.append(task)

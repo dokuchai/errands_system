@@ -10,7 +10,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
-from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks
+from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user
 
 
 class IconsListView(ListAPIView):
@@ -139,6 +139,19 @@ class DeleteFriendToBoardView(APIView):
             return Response({"message": "Пользователя не существует!"}, status=status.HTTP_400_BAD_REQUEST)
         except Boards.DoesNotExist:
             return Response({"message": "Доски не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AddFriendToBoardView(APIView):
+    def post(self, request, pk):
+        name, user = str(request.data['name']).split(' '), None
+        if len(name) == 1:
+            user = get_or_create_user(last_name=name[0], first_name='', father_name='')
+        elif len(name) == 2:
+            user = get_or_create_user(last_name=name[0], first_name=name[1], father_name='')
+        elif len(name) == 3:
+            user = get_or_create_user(last_name=name[0], first_name=name[1], father_name=name[2])
+        friend, created = FriendBoardPermission.objects.get_or_create(board_id=pk, friend_id=user.id)
+        return Response(BoardFriendSerializer(friend).data, status=status.HTTP_200_OK)
 
 
 class ISUView(APIView):

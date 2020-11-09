@@ -245,7 +245,7 @@ class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
 
     def get_active_tasks(self, obj):
         tasks = Tasks.objects.filter(project=obj, status__in=('В работе', 'Требуется помощь'),
-                                     board_id=self.context['board']).order_by(F('term').asc(nulls_last=True))
+                                     board_id=self.context['board']).order_by(F('term').asc(nulls_last=True), 'id')
         return TaskListSerializer(tasks, many=True).data
 
 
@@ -276,7 +276,7 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,
                                      status__in=('В работе', 'Требуется помощь')).order_by(
-            F('term').asc(nulls_last=True))
+            F('term').asc(nulls_last=True), 'id')
         return {
             "id": instance.id,
             "title": instance.title,

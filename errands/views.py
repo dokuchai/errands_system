@@ -154,6 +154,20 @@ class AddFriendToBoardView(APIView):
         return Response(BoardFriendSerializer(friend).data, status=status.HTTP_200_OK)
 
 
+class ChangeFriendPermissionToBoardView(APIView):
+    def post(self, request, pk):
+        try:
+            friend = FriendBoardPermission.objects.get(board_id=pk, friend_id=request.data['id'])
+            friend.redactor = request.data['redactor']
+            friend.save()
+            return Response(BoardFriendSerializer(friend).data, status=status.HTTP_200_OK)
+        except Boards.DoesNotExist:
+            return Response({"message": "Доски не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+        except FriendBoardPermission.DoesNotExist:
+            return Response({"message": "Пользователь не является другом доски или его не существует"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
 class ISUView(APIView):
     def post(self, request, pk):
         date = request.data['date']

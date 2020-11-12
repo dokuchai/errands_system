@@ -291,6 +291,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
             "id": instance.id,
             "title": instance.title,
             "status": instance.status,
+            "owner": instance.owner.get_full_name(),
             "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }
@@ -307,6 +308,7 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
             "id": instance.id,
             "title": instance.title,
             "status": instance.status,
+            "owner": instance.owner.get_full_name(),
             "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
             "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
         }

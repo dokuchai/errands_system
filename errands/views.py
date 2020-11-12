@@ -6,6 +6,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from users.models import CustomUser
+from changelog.models import ChangeLog
+from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer)
@@ -199,3 +201,10 @@ class ISUView(APIView):
             return Response(TaskListSerializer(tasks, many=True).data, status=status.HTTP_201_CREATED)
         else:
             return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
+
+
+class ChangeLogsTaskView(APIView):
+    def get(self, request, pk):
+        task = Tasks.objects.get(id=pk)
+        changelogs = ChangeLog.objects.filter(record_id=task.id)
+        return Response(ChangeLogSerializer(changelogs, many=True).data, status=status.HTTP_200_OK)

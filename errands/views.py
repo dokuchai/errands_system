@@ -59,7 +59,7 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
 
     def get_serializer_context(self):
         context = super(TaskRetrieveUpdateView, self).get_serializer_context()
-        context.update({'user': self.request.user.id})
+        context.update({'user': self.request.user})
         return context
 
 

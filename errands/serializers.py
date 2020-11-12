@@ -145,14 +145,14 @@ class TaskDetailSerializer(serializers.ModelSerializer):
 
     def check_friend(self, obj):
         try:
-            FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])
+            FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'].id)
             return True
         except FriendBoardPermission.DoesNotExist:
             return False
 
     def check_friend_redactor(self, obj):
         try:
-            friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])
+            friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'].id)
             if friend.redactor:
                 return True
             else:
@@ -185,59 +185,66 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'.lstrip()
 
     def update(self, instance, validated_data):
-        instance.title = validated_data.get('title', instance.title)
-        instance.text = validated_data.get('text', instance.text)
-        instance.term = validated_data.get('term', instance.term)
-        instance.status = validated_data.get('status', instance.status)
-        icon, executors = validated_data.pop('icon', None), []
-        try:
-            instance.icon = Icons.objects.get(description=icon['description'])
-        except Icons.DoesNotExist:
-            instance.icon = None
-        except TypeError:
-            pass
-        if 'resp_id' in validated_data:
-            if str(validated_data['resp_id']).isdigit():
-                try:
-                    instance.responsible = CustomUser.objects.get(id=int(validated_data['resp_id']))
-                except CustomUser.DoesNotExist:
-                    pass
-            else:
-                instance.responsible = None
-        if 'name' in validated_data:
-            responsible = None
-            name = str(validated_data['name']).split(' ')
-            if len(name) == 2:
-                try:
-                    responsible = CustomUser.objects.get(first_name=name[1], last_name=name[0],
-                                                         friend_board=instance.board)
-                except CustomUser.DoesNotExist:
-                    responsible = add_new_responsible(first_name=name[1], last_name=name[0], board_id=instance.board.id)
-            elif len(name) == 1 and name[0] != '':
-                try:
-                    responsible = CustomUser.objects.get(first_name=name[0], last_name='', friend_board=instance.board)
-                except CustomUser.DoesNotExist:
-                    responsible = add_new_responsible(first_name=name[0], last_name='', board_id=instance.board.id)
-            instance.responsible = responsible
-        if 'project' in validated_data:
-            if validated_data['project'] == 'null' or validated_data['project'] == '':
-                instance.project = None
-            else:
-                project, created = Project.objects.get_or_create(title=validated_data['project'])
-                instance.project = project
-        if 'exec_name' in validated_data:
-            for executor in validated_data['exec_name']:
-                name = executor.split(' ')
-                if len(name) == 1:
-                    executors.append(add_new_user(first_name=name[1], last_name='', board_id=instance.board.id))
-                elif len(name) == 2:
-                    executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=instance.board.id))
-        if 'exec_id' in validated_data:
-            for executor in validated_data['exec_id']:
-                executors.append(CustomUser.objects.get(id=executor))
-        instance.so_executors.add(*executors)
-        instance.save()
-        return instance
+        friend = FriendBoardPermission.objects.get(board_id=instance.board.id, friend_id=self.context['user'].id)
+        if instance.board.owner == self.context['user'] or friend.redactor:
+            instance.title = validated_data.get('title', instance.title)
+            instance.text = validated_data.get('text', instance.text)
+            instance.term = validated_data.get('term', instance.term)
+            instance.status = validated_data.get('status', instance.status)
+            icon, executors = validated_data.pop('icon', None), []
+            try:
+                instance.icon = Icons.objects.get(description=icon['description'])
+            except Icons.DoesNotExist:
+                instance.icon = None
+            except TypeError:
+                pass
+            if 'resp_id' in validated_data:
+                if str(validated_data['resp_id']).isdigit():
+                    try:
+                        instance.responsible = CustomUser.objects.get(id=int(validated_data['resp_id']))
+                    except CustomUser.DoesNotExist:
+                        pass
+                else:
+                    instance.responsible = None
+            if 'name' in validated_data:
+                responsible = None
+                name = str(validated_data['name']).split(' ')
+                if len(name) == 2:
+                    try:
+                        responsible = CustomUser.objects.get(first_name=name[1], last_name=name[0],
+                                                             friend_board=instance.board)
+                    except CustomUser.DoesNotExist:
+                        responsible = add_new_responsible(first_name=name[1], last_name=name[0],
+                                                          board_id=instance.board.id)
+                elif len(name) == 1 and name[0] != '':
+                    try:
+                        responsible = CustomUser.objects.get(first_name=name[0], last_name='',
+                                                             friend_board=instance.board)
+                    except CustomUser.DoesNotExist:
+                        responsible = add_new_responsible(first_name=name[0], last_name='', board_id=instance.board.id)
+                instance.responsible = responsible
+            if 'project' in validated_data:
+                if validated_data['project'] == 'null' or validated_data['project'] == '':
+                    instance.project = None
+                else:
+                    project, created = Project.objects.get_or_create(title=validated_data['project'])
+                    instance.project = project
+            if 'exec_name' in validated_data:
+                for executor in validated_data['exec_name']:
+                    name = executor.split(' ')
+                    if len(name) == 1:
+                        executors.append(add_new_user(first_name=name[1], last_name='', board_id=instance.board.id))
+                    elif len(name) == 2:
+                        executors.append(
+                            add_new_user(first_name=name[1], last_name=name[0], board_id=instance.board.id))
+            if 'exec_id' in validated_data:
+                for executor in validated_data['exec_id']:
+                    executors.append(CustomUser.objects.get(id=executor))
+            instance.so_executors.add(*executors)
+            instance.save()
+            return instance
+        else:
+            return instance
 
 
 class ProjectsSerializer(serializers.ModelSerializer):

@@ -27,4 +27,9 @@ class ChangeLogSerializer(serializers.ModelSerializer):
             if project:
                 project = str(data['project']).lstrip('<Project: ').rstrip('>')
                 data.update({'project': project})
+        if 'board' in data:
+            board = data['board']
+            if board:
+                board = str(data['board']).lstrip('<Boards: ').rstrip('>')
+                data.update({'board': board})
         return data

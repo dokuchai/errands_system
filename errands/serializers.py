@@ -185,7 +185,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'.lstrip()
 
     def update(self, instance, validated_data):
-        friend = FriendBoardPermission.objects.get(board_id=instance.board.id, friend_id=self.context['user'].id)
+        friend = FriendBoardPermission.objects.filter(board_id=instance.board.id, friend_id=self.context['user'].id)
         if instance.board.owner == self.context['user'] or friend.redactor:
             instance.title = validated_data.get('title', instance.title)
             instance.text = validated_data.get('text', instance.text)

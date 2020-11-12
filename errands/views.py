@@ -57,6 +57,11 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
         elif self.action == "partial_update":
             return TaskUpdateSerializer
 
+    def get_serializer_context(self):
+        context = super(TaskRetrieveUpdateView, self).get_serializer_context()
+        context.update({'user': self.request.user.id})
+        return context
+
 
 class TaskCreateView(CreateAPIView):
     queryset = Tasks.objects.all()

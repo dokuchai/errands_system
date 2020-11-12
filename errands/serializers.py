@@ -115,11 +115,13 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
+    friend = serializers.SerializerMethodField('check_friend')
+    redactor = serializers.SerializerMethodField('check_friend_redactor')
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
-                  'so_executors')
+                  'so_executors', 'friend', 'redactor')
 
     def get_responsible_name(self, obj):
         if obj.responsible:
@@ -140,6 +142,23 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     def get_project(self, obj):
         if obj.project:
             return obj.project.title
+
+    def check_friend(self, obj):
+        try:
+            FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])
+            return True
+        except FriendBoardPermission.DoesNotExist:
+            return False
+
+    def check_friend_redactor(self, obj):
+        try:
+            friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])
+            if friend.redactor:
+                return True
+            else:
+                return False
+        except FriendBoardPermission.DoesNotExist:
+            return False
 
 
 class TaskUpdateSerializer(serializers.ModelSerializer):

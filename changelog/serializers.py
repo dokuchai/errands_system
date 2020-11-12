@@ -10,7 +10,8 @@ class ChangeLogSerializer(serializers.ModelSerializer):
         model = ChangeLog
         fields = ('id', 'changed', 'user', 'action', 'data')
 
-    def get_readable_data(self, obj):
+    @staticmethod
+    def get_readable_data(obj):
         data = obj.data
         if 'responsible' in data:
             responsible = data['responsible']

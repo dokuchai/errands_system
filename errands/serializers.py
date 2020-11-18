@@ -285,30 +285,36 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
-        tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
-        return {
-            "id": instance.id,
-            "title": instance.title,
-            "status": instance.status,
-            "owner": instance.owner.get_full_name(),
-            "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
-            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
-        }
+        if instance.status != 'Личная' or instance.owner == self.context['user']:
+            projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
+            tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
+            return {
+                "id": instance.id,
+                "title": instance.title,
+                "status": instance.status,
+                "owner": instance.owner.get_full_name(),
+                "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
+                "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
+            }
+        else:
+            return {'message': 'Это личная доска, Вы не можете посмотреть содержимое'}
 
 
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        projects = Project.objects.filter(project_tasks__board=instance,
-                                          project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
-        tasks = Tasks.objects.filter(board=instance, project=None,
-                                     status__in=('В работе', 'Требуется помощь')).order_by(
-            F('term').asc(nulls_last=True), 'id')
-        return {
-            "id": instance.id,
-            "title": instance.title,
-            "status": instance.status,
-            "owner": instance.owner.get_full_name(),
-            "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
-            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
-        }
+        if instance.status != 'Личная' or instance.owner == self.context['user']:
+            projects = Project.objects.filter(project_tasks__board=instance,
+                                              project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
+            tasks = Tasks.objects.filter(board=instance, project=None,
+                                         status__in=('В работе', 'Требуется помощь')).order_by(
+                F('term').asc(nulls_last=True), 'id')
+            return {
+                "id": instance.id,
+                "title": instance.title,
+                "status": instance.status,
+                "owner": instance.owner.get_full_name(),
+                "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
+                "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
+            }
+        else:
+            return {'message': 'Это личная доска, Вы не можете посмотреть содержимое'}

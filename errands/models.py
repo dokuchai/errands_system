@@ -95,6 +95,7 @@ class Tasks(ChangeloggableMixin, models.Model):
                              null=True)
     parent = models.ForeignKey('self', on_delete=models.PROTECT, verbose_name='Родительская задача', blank=True,
                                null=True)
+    version = models.PositiveIntegerField('Версия', default=1)
 
     class Meta:
         verbose_name = 'Задача'
@@ -105,5 +106,5 @@ class Tasks(ChangeloggableMixin, models.Model):
         return self.title
 
 
-# post_save.connect(journal_save_handler, sender=Tasks)
-# post_delete.connect(journal_delete_handler, sender=Tasks)
+post_save.connect(journal_save_handler, sender=Tasks)
+post_delete.connect(journal_delete_handler, sender=Tasks)

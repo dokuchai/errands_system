@@ -35,16 +35,23 @@ class BoardRetrieveUpdateView(viewsets.ModelViewSet):
         elif self.action == "update":
             return BoardSerializer
 
+    def get_serializer_context(self):
+        context = super(BoardRetrieveUpdateView, self).get_serializer_context()
+        context.update({'user': self.request.user})
+        return context
 
-class BoardTasksActiveView(viewsets.ModelViewSet):
-    queryset = Boards.objects.all()
-    permission_classes = [IsAuthenticated]
 
+class BoardTasksActiveView(BoardRetrieveUpdateView):
     def get_serializer_class(self):
         if self.action == "retrieve":
             return BoardActiveTasksSerializer
         elif self.action == "update":
             return BoardSerializer
+
+    def get_serializer_context(self):
+        context = super(BoardTasksActiveView, self).get_serializer_context()
+        context.update({'user': self.request.user})
+        return context
 
 
 class TaskRetrieveUpdateView(viewsets.ModelViewSet):
@@ -210,6 +217,9 @@ class ISUView(APIView):
 
 class ChangeLogsTaskView(APIView):
     def get(self, request, pk):
-        task = Tasks.objects.get(id=pk)
-        changelogs = ChangeLog.objects.filter(record_id=task.id)
-        return Response(ChangeLogSerializer(changelogs, many=True).data, status=status.HTTP_200_OK)
+        try:
+            task = Tasks.objects.get(id=pk)
+            changelogs = ChangeLog.objects.filter(record_id=task.id)
+            return Response(ChangeLogSerializer(changelogs, many=True).data, status=status.HTTP_200_OK)
+        except Tasks.DoesNotExist:
+            return Response({'message': 'Задачи не существует!'}, status=status.HTTP_400_BAD_REQUEST)

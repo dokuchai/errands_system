@@ -12,11 +12,11 @@ class CustomUserSerializer(serializers.Serializer):
 
 
 class UserSignInSerializer(serializers.Serializer):
-    email = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
 
 
 class UserRegisterSerializer(serializers.Serializer):
-    email = serializers.CharField(required=True)
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(required=True)
     password_confirm = serializers.CharField(required=True)

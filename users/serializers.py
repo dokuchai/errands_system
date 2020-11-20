@@ -15,3 +15,8 @@ class UserSignInSerializer(serializers.Serializer):
     email = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
 
+
+class UserRegisterSerializer(serializers.Serializer):
+    email = serializers.CharField(required=True)
+    password = serializers.CharField(required=True)
+    password_confirm = serializers.CharField(required=True)

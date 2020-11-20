@@ -10,8 +10,8 @@ from changelog.models import ChangeLog
 from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
-                          TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer)
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
+                          TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer, CheckPointSerializer)
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint
 from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user
 
 
@@ -223,3 +223,21 @@ class ChangeLogsTaskView(APIView):
             return Response(ChangeLogSerializer(changelogs, many=True).data, status=status.HTTP_200_OK)
         except Tasks.DoesNotExist:
             return Response({'message': 'Задачи не существует!'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CheckPointView(APIView):
+    def post(self, request, pk):
+        serializer = CheckPointSerializer(data=request.data)
+        if serializer.is_valid():
+            checkpoint = CheckPoint.objects.create(date=serializer.data['date'], text=serializer.data['text'],
+                                                   task_id=pk)
+            return Response(CheckPointSerializer(checkpoint).data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        if CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).exists():
+            CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).delete()
+            return Response({"message": "Чекпоинт удален!"}, status=status.HTTP_200_OK)
+        else:
+            return Response({"message": "Чекпоинта не существует!"}, status=status.HTTP_400_BAD_REQUEST)

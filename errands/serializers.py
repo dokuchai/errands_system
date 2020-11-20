@@ -4,7 +4,7 @@ from django.db.models import F
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint
 from .services import add_new_responsible, add_new_user
 
 
@@ -12,6 +12,14 @@ class IconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Icons
         fields = ('id', 'image', 'description')
+
+
+class CheckPointSerializer(serializers.ModelSerializer):
+    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"])
+
+    class Meta:
+        model = CheckPoint
+        fields = ('id', 'date', 'text')
 
 
 class SoExecutorSerializer(serializers.ModelSerializer):
@@ -116,11 +124,12 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
     redactor = serializers.SerializerMethodField('check_redactor')
+    check_points = CheckPointSerializer(many=True)
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
-                  'so_executors', 'redactor')
+                  'so_executors', 'redactor', 'check_points')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

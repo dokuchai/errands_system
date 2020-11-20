@@ -108,3 +108,13 @@ class Tasks(ChangeloggableMixin, models.Model):
 
 post_save.connect(journal_save_handler, sender=Tasks)
 post_delete.connect(journal_delete_handler, sender=Tasks)
+
+
+class CheckPoint(ChangeloggableMixin, models.Model):
+    date = models.DateTimeField('Дата', auto_now=False)
+    text = models.TextField('Текст', blank=True, null=True)
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='check_points')
+
+    class Meta:
+        verbose_name = 'Чекпоинт'
+        verbose_name_plural = 'Чекпоинты'

@@ -22,7 +22,7 @@ class CustomUserTokenCreateOrRefresh(APIView):
             password=sign_in_serializer.data['password']
         )
         if not user:
-            return Response({'detail': 'Invalid Credentials or activate account'}, status=HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Неверные данные для входа!'}, status=HTTP_404_NOT_FOUND)
         return token_stuff(user=user)
 
 

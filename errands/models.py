@@ -113,6 +113,7 @@ post_delete.connect(journal_delete_handler, sender=Tasks)
 class CheckPoint(ChangeloggableMixin, models.Model):
     date = models.DateTimeField('Дата', auto_now=False)
     text = models.TextField('Текст', blank=True, null=True)
+    status = models.BooleanField('Статус', default=False)
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='check_points')
 
     class Meta:

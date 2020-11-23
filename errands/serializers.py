@@ -19,7 +19,7 @@ class CheckPointSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CheckPoint
-        fields = ('id', 'date', 'text')
+        fields = ('id', 'date', 'text', 'status')
 
 
 class SoExecutorSerializer(serializers.ModelSerializer):

@@ -4,7 +4,7 @@ from django.db.models import F
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment
 from .services import add_new_responsible, add_new_user
 
 
@@ -20,6 +20,23 @@ class CheckPointSerializer(serializers.ModelSerializer):
     class Meta:
         model = CheckPoint
         fields = ('id', 'date', 'text', 'status')
+
+
+class CommentCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ('text',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    user = serializers.SerializerMethodField('get_user_name')
+
+    class Meta:
+        model = Comment
+        fields = ('id', 'text', 'date', 'user')
+
+    def get_user_name(self, obj):
+        return f'{obj.user.last_name} {obj.user.first_name}'
 
 
 class SoExecutorSerializer(serializers.ModelSerializer):
@@ -125,11 +142,12 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     project = serializers.SerializerMethodField('get_project')
     redactor = serializers.SerializerMethodField('check_redactor')
     check_points = CheckPointSerializer(many=True)
+    comments = CommentSerializer(many=True)
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
-                  'so_executors', 'redactor', 'check_points')
+                  'so_executors', 'redactor', 'check_points', 'comments')
 
     def get_responsible_name(self, obj):
         if obj.responsible:
@@ -225,7 +243,8 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
                             responsible = CustomUser.objects.get(first_name=name[0], last_name='',
                                                                  friend_board=instance.board)
                         except CustomUser.DoesNotExist:
-                            responsible = add_new_responsible(first_name=name[0], last_name='', board_id=instance.board.id)
+                            responsible = add_new_responsible(first_name=name[0], last_name='',
+                                                              board_id=instance.board.id)
                     instance.responsible = responsible
                 if 'project' in validated_data:
                     if validated_data['project'] == 'null' or validated_data['project'] == '':

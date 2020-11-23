@@ -119,3 +119,17 @@ class CheckPoint(ChangeloggableMixin, models.Model):
     class Meta:
         verbose_name = 'Чекпоинт'
         verbose_name_plural = 'Чекпоинты'
+
+
+class Comment(ChangeloggableMixin, models.Model):
+    date = models.DateTimeField('Дата', auto_now_add=True)
+    text = models.TextField('Текст')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь',
+                             related_name='user_comments')
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='comments')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Родительский комментарий',
+                               related_name='replies', blank=True, null=True)
+
+    class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'

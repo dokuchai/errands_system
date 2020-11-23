@@ -8,11 +8,12 @@ from rest_framework.views import APIView
 from users.models import CustomUser
 from changelog.models import ChangeLog
 from changelog.serializers import ChangeLogSerializer
-from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer,
-                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer,
+from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
+                          IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer, CheckPointSerializer)
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint
-from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment
+from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
+    check_request_user_to_relation_with_current_task
 
 
 class IconsListView(ListAPIView):
@@ -241,3 +242,29 @@ class CheckPointView(APIView):
             return Response({"message": "Чекпоинт удален!"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Чекпоинта не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class CommentsView(APIView):
+    def post(self, request, pk):
+        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        if user_status:
+            serializer = CommentCreateSerializer(data=request.data)
+            if serializer.is_valid():
+                comment = Comment.objects.create(text=serializer.data['text'], task_id=pk, user=request.user)
+                return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'Вы не можете добавить комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        user_status = check_request_user_to_relation_with_current_task(task_id=pk, request=request)
+        if user_status:
+            comment = Comment.objects.filter(id=request.data.get('id'), task_id=pk)
+            if comment:
+                comment.delete()
+                return Response({"message": "Комментарий удален!"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Комментария не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'Вы не можете удалить комментарий!'}, status=status.HTTP_400_BAD_REQUEST)

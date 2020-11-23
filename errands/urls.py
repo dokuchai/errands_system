@@ -1,7 +1,8 @@
 from django.urls import path
 from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView, IconsListView, BoardFriendsView,
                     FriendView, DeleteExecutorView, BoardTasksActiveView, BoardsListView, ISUView, ChangeLogsTaskView,
-                    AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView)
+                    AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
+                    CommentsView)
 
 urlpatterns = [
     path('boards/', BoardsListView.as_view()),
@@ -18,5 +19,6 @@ urlpatterns = [
     path('task/<int:pk>/delete-executor/', DeleteExecutorView.as_view()),
     path('task/<int:pk>/changelogs/', ChangeLogsTaskView.as_view()),
     path('task/<int:pk>/checkpoint/', CheckPointView.as_view()),
+    path('task/<int:pk>/comment/', CommentsView.as_view()),
     path('icons/', IconsListView.as_view()),
 ]

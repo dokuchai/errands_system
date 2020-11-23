@@ -61,3 +61,11 @@ def get_or_create_isu_tasks(items, board, responsible_full_name, tasks, project,
                                                             project=project, responsible=responsible,
                                                             term=item['deadline'], icon_id=message_and_icon['icon'])
                 tasks.append(task)
+
+
+def check_request_user_to_relation_with_current_task(task_id, request):
+    task = Tasks.objects.get(id=task_id)
+    if request.user in task.so_executors.all() or task.responsible == request.user or task.board.owner == request.user:
+        return True
+    else:
+        return False

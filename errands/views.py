@@ -274,3 +274,18 @@ class CommentsView(APIView):
                 return Response({"message": "Комментария не существует!"}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response({'message': 'Вы не можете удалить комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class FileDelete(APIView):
+    def delete(self, request, pk):
+        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        if user_status:
+            file = File.objects.filter(id=request.data.get('id'), task_id=pk)
+            if file:
+                file.delete()
+                return Response({"message": "Файл удален!"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"message": "Файла не существует!"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'У вас недостаточно прав для удаления файла'},
+                            status=status.HTTP_400_BAD_REQUEST)

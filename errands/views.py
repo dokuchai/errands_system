@@ -266,6 +266,27 @@ class CommentsView(APIView):
         else:
             return Response({'message': 'Вы не можете добавить комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
 
+    def put(self, request, pk):
+        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        if user_status:
+            serializer = CommentCreateSerializer(data=request.data)
+            if serializer.is_valid():
+                try:
+                    comment = Comment.objects.get(id=request.data.get('id'), task_id=pk)
+                    if comment.user == request.user:
+                        comment.text = serializer.data['text']
+                        comment.save()
+                        return Response(CommentSerializer(comment).data, status=status.HTTP_200_OK)
+                    else:
+                        return Response({'message': 'Вы не можете редактировать чужой комментарий!'},
+                                        status=status.HTTP_400_BAD_REQUEST)
+                except Comment.DoesNotExist:
+                    return Response({'message': 'Комментария не существует!'}, status=status.HTTP_404_NOT_FOUND)
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'message': 'Вы не можете редактировать комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
+
     def delete(self, request, pk):
         user_status = check_request_user_to_relation_with_current_task(task_id=pk, request=request)
         if user_status:

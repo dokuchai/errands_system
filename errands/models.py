@@ -133,3 +133,12 @@ class Comment(ChangeloggableMixin, models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+
+class File(ChangeloggableMixin, models.Model):
+    file = models.FileField('Файл', upload_to='files/')
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='files')
+
+    class Meta:
+        verbose_name = 'Файл'
+        verbose_name_plural = 'Файлы'

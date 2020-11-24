@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     'djoser',
     'changelog.apps.ChangelogConfig',
     'errands.apps.ErrandsConfig',
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [

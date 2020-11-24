@@ -4,7 +4,7 @@ from django.db.models import F
 from rest_framework import serializers
 
 from users.models import CustomUser
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_responsible, add_new_user
 
 
@@ -12,6 +12,12 @@ class IconSerializer(serializers.ModelSerializer):
     class Meta:
         model = Icons
         fields = ('id', 'image', 'description')
+
+
+class FileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = File
+        fields = ('id', 'task', 'file')
 
 
 class CheckPointSerializer(serializers.ModelSerializer):
@@ -143,11 +149,12 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     redactor = serializers.SerializerMethodField('check_redactor')
     check_points = CheckPointSerializer(many=True)
     comments = CommentSerializer(many=True)
+    files = FileSerializer(many=True)
 
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
-                  'so_executors', 'redactor', 'check_points', 'comments')
+                  'so_executors', 'redactor', 'check_points', 'comments', 'files')
 
     def get_responsible_name(self, obj):
         if obj.responsible:
@@ -194,12 +201,13 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     project = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     exec_id = serializers.ListField(default=[])
     exec_name = serializers.ListField(default=[])
+    files = FileSerializer(many=True)
 
     class Meta:
         model = Tasks
         fields = (
             'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status',
-            'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name')
+            'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name', 'files')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

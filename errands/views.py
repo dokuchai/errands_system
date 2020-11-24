@@ -11,7 +11,7 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer, CheckPointSerializer)
-from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment
+from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
     check_request_user_to_relation_with_current_task
 
@@ -64,6 +64,11 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
             return TaskDetailSerializer
         elif self.action == "partial_update":
             return TaskUpdateSerializer
+
+    def perform_update(self, serializer):
+        if self.request.FILES:
+            for file in self.request.FILES.getlist('files'):
+                File.objects.create(file=file, task_id=self.kwargs['pk'])
 
     def get_serializer_context(self):
         context = super(TaskRetrieveUpdateView, self).get_serializer_context()

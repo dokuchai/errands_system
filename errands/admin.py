@@ -15,6 +15,7 @@ class BoardAdmin(admin.ModelAdmin):
 @admin.register(Tasks)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'board')
+    readonly_fields = ['version']
 
 
 @admin.register(Icons)

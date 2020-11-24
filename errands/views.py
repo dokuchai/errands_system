@@ -68,7 +68,10 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         if self.request.FILES:
             for file in self.request.FILES.getlist('files'):
-                File.objects.create(file=file, task_id=self.kwargs['pk'])
+                file_obj = File.objects.create(file=file, task_id=self.kwargs['pk'])
+                file_name = str(file_obj).split('/')[-1]
+                file_obj.name = file_name
+                file_obj.save()
         serializer.save()
 
     def get_serializer_context(self):

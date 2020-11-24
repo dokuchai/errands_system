@@ -17,7 +17,7 @@ class IconSerializer(serializers.ModelSerializer):
 class FileSerializer(serializers.ModelSerializer):
     class Meta:
         model = File
-        fields = ('id', 'task', 'file')
+        fields = ('id', 'task', 'file', 'name')
 
 
 class CheckPointSerializer(serializers.ModelSerializer):

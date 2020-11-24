@@ -136,9 +136,13 @@ class Comment(ChangeloggableMixin, models.Model):
 
 
 class File(ChangeloggableMixin, models.Model):
+    name = models.CharField('Имя', max_length=100, blank=True, null=True)
     file = models.FileField('Файл', upload_to='files/')
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='files')
 
     class Meta:
         verbose_name = 'Файл'
         verbose_name_plural = 'Файлы'
+
+    def __str__(self):
+        return self.file.url

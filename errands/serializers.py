@@ -28,6 +28,10 @@ class CheckPointSerializer(serializers.ModelSerializer):
         fields = ('id', 'date', 'text', 'status')
 
 
+class CheckPointUpdateSerializer(CheckPointSerializer):
+    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+
+
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment

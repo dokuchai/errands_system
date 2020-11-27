@@ -1,6 +1,6 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK
+from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND
 
 from .authentication import token_expire_handler, expires_in
 from .serializers import CustomUserSerializer
@@ -19,3 +19,11 @@ def token_stuff(user):
         'created': token.created,
         'token': token.key
     }, status=HTTP_200_OK)
+
+
+def check_token(request):
+    try:
+        Token.objects.get(key=request.data['token'])
+        return Response({'message': True}, status=HTTP_200_OK)
+    except Token.DoesNotExist:
+        return Response({'message': False}, status=HTTP_404_NOT_FOUND)

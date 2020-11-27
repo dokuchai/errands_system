@@ -8,7 +8,7 @@ from rest_framework.views import APIView
 
 from .serializers import UserSignInSerializer, UserRegisterSerializer
 from .models import CustomUser
-from .services import token_stuff
+from .services import token_stuff, check_token
 
 
 class CustomUserTokenCreateOrRefresh(APIView):
@@ -40,3 +40,8 @@ class RegisterUserView(APIView):
         user.set_password(register_serializer.data['password'])
         user.save()
         return token_stuff(user=user)
+
+
+class CheckTokenView(APIView):
+    def get(self, request):
+        return check_token(request)

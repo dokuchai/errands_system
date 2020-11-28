@@ -43,5 +43,5 @@ class RegisterUserView(APIView):
 
 
 class CheckTokenView(APIView):
-    def get(self, request):
+    def post(self, request):
         return check_token(request)

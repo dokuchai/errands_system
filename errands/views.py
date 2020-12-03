@@ -195,8 +195,7 @@ class ChangeFriendPermissionToBoardView(APIView):
 
 class ISUView(APIView):
     def post(self, request, pk):
-        date = request.data['date']
-        url = f"http://isuapi.admlr.lipetsk.ru/api/get-ambulance-messages?date={date}"
+        url = f"http://isuapi.admlr.lipetsk.ru/api/get-ambulance-messages"
         payload = {}
         headers = {}
         response = requests.request("GET", url, headers=headers, data=payload)

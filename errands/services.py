@@ -60,7 +60,8 @@ def get_or_create_isu_tasks(items, board, responsible_full_name, tasks, project,
                 task, created = Tasks.objects.get_or_create(title=message_and_icon['message'], board=board,
                                                             project=project, responsible=responsible,
                                                             term=item['deadline'], icon_id=message_and_icon['icon'])
-                tasks.append(task)
+                if created:
+                    tasks.append(task)
 
 
 def check_request_user_to_relation_with_current_task(task_id, request):

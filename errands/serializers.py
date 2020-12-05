@@ -92,18 +92,24 @@ class TaskCreateSerializer(serializers.ModelSerializer):
 class TaskListSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     responsible = serializers.SerializerMethodField('get_responsible_name')
-    icon = serializers.SerializerMethodField("get_icon_url")
+    icon = serializers.SerializerMethodField("get_icon_description")
+    icon_url = serializers.SerializerMethodField("get_icon_url")
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'resp_id', 'so_executors')
+        fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'resp_id',
+                  'so_executors')
 
     def get_icon_url(self, obj):
         if obj.icon:
             return obj.icon.image.url
+
+    def get_icon_description(self, obj):
+        if obj.icon:
+            return obj.icon.description
 
     def get_responsible_name(self, obj):
         if obj.responsible:
@@ -121,17 +127,23 @@ class TaskListSerializer(serializers.ModelSerializer):
 class TaskListWithoutProjectSerializer(serializers.ModelSerializer):
     term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
     responsible = serializers.SerializerMethodField('get_responsible_name')
-    icon = serializers.SerializerMethodField("get_icon_url")
+    icon = serializers.SerializerMethodField("get_icon_description")
+    icon_url = serializers.SerializerMethodField("get_icon_url")
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
 
     class Meta:
         model = Tasks
-        fields = ('id', 'title', 'status', 'term', 'responsible', 'icon', 'board', 'resp_id', 'so_executors')
+        fields = (
+            'id', 'title', 'status', 'term', 'responsible', 'icon', 'icon_url', 'board', 'resp_id', 'so_executors')
 
     def get_icon_url(self, obj):
         if obj.icon:
             return obj.icon.image.url
+
+    def get_icon_description(self, obj):
+        if obj.icon:
+            return obj.icon.description
 
     def get_responsible_name(self, obj):
         if obj.responsible:

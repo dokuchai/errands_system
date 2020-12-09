@@ -339,7 +339,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
                 {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
         elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
                 in instance.friends.all():
-            return CustomAPIException(
+            raise CustomAPIException(
                 {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
         projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
@@ -356,11 +356,11 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
         if instance.status == 'Личная' and instance.owner != self.context['user']:
-            return CustomAPIException(
+            raise CustomAPIException(
                 {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
         elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
                 in instance.friends.all():
-            return CustomAPIException(
+            raise CustomAPIException(
                 {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
         projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()

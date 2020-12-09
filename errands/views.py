@@ -86,6 +86,31 @@ class TaskCreateView(CreateAPIView):
     serializer_class = TaskCreateSerializer
     permission_classes = [IsAuthenticated]
 
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=self.request.data)
+        serializer.is_valid(raise_exception=True)
+        board = Boards.objects.get(id=self.kwargs['pk'])
+        if board.status == 'Личная':
+            if board.owner == request.user:
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                return Response({"message": "Пользователь сделал доску приватной, вы не можете создать задачу"},
+                                status=status.HTTP_403_FORBIDDEN)
+        elif board.status == 'Для друзей':
+            if board.owner == request.user or request.user in board.friends.all():
+                self.perform_create(serializer)
+                headers = self.get_success_headers(serializer.data)
+                return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+            else:
+                return Response({"message": "Вы не можете добавить задачу, свяжитесь с владельцем доски"},
+                                status=status.HTTP_403_FORBIDDEN)
+        else:
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
     def perform_create(self, serializer):
         icon, resp, project = None, None, None
         executors = []

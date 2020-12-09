@@ -5,7 +5,7 @@ from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
-from .services import add_new_responsible, add_new_user
+from .services import add_new_responsible, add_new_user, CustomAPIException
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -334,36 +334,44 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        if instance.status != 'Личная' or instance.owner == self.context['user']:
-            projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
-            tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
-            return {
-                "id": instance.id,
-                "title": instance.title,
-                "status": instance.status,
-                "owner": instance.owner.get_full_name(),
-                "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
-                "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
-            }
-        else:
-            return {'message': 'Это личная доска, Вы не можете посмотреть содержимое'}
+        if instance.status == 'Личная' and instance.owner != self.context['user']:
+            raise CustomAPIException(
+                {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
+        elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
+                in instance.friends.all():
+            return CustomAPIException(
+                {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
+        projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
+        tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "status": instance.status,
+            "owner": instance.owner.get_full_name(),
+            "projects": ProjectsSerializer(projects, many=True, context={'board': instance.id}).data,
+            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
+        }
 
 
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        if instance.status != 'Личная' or instance.owner == self.context['user']:
-            projects = Project.objects.filter(project_tasks__board=instance,
-                                              project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
-            tasks = Tasks.objects.filter(board=instance, project=None,
-                                         status__in=('В работе', 'Требуется помощь')).order_by(
-                F('term').asc(nulls_last=True), 'id')
-            return {
-                "id": instance.id,
-                "title": instance.title,
-                "status": instance.status,
-                "owner": instance.owner.get_full_name(),
-                "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
-                "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
-            }
-        else:
-            return {'message': 'Это личная доска, Вы не можете посмотреть содержимое'}
+        if instance.status == 'Личная' and instance.owner != self.context['user']:
+            return CustomAPIException(
+                {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
+        elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
+                in instance.friends.all():
+            return CustomAPIException(
+                {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
+        projects = Project.objects.filter(project_tasks__board=instance,
+                                          project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
+        tasks = Tasks.objects.filter(board=instance, project=None,
+                                     status__in=('В работе', 'Требуется помощь')).order_by(
+            F('term').asc(nulls_last=True), 'id')
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "status": instance.status,
+            "owner": instance.owner.get_full_name(),
+            "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
+            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
+        }

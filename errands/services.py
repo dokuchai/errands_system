@@ -1,4 +1,5 @@
 from django.utils.crypto import get_random_string
+from rest_framework import exceptions, status
 
 from errands.models import Boards, Tasks, Icons
 from users.models import CustomUser
@@ -70,3 +71,13 @@ def check_request_user_to_relation_with_current_task(task_id, request):
         return True
     else:
         return False
+
+
+class CustomAPIException(exceptions.APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    default_code = 'error'
+
+    def __init__(self, detail, status_code=None):
+        self.detail = detail
+        if status_code is not None:
+            self.status_code = status_code

@@ -5,7 +5,8 @@ from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
-from .services import add_new_responsible, add_new_user, CustomAPIException
+from .services import add_new_responsible, add_new_user, CustomAPIException, \
+    check_user_to_relation_with_current_board_in_serializer
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -334,13 +335,7 @@ class BoardSerializer(serializers.ModelSerializer):
 
 class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        if instance.status == 'Личная' and instance.owner != self.context['user']:
-            raise CustomAPIException(
-                {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
-        elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
-                in instance.friends.all():
-            raise CustomAPIException(
-                {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
+        check_user_to_relation_with_current_board_in_serializer(self, instance)
         projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
         return {
@@ -355,13 +350,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
 
 class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
-        if instance.status == 'Личная' and instance.owner != self.context['user']:
-            raise CustomAPIException(
-                {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
-        elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
-                in instance.friends.all():
-            raise CustomAPIException(
-                {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
+        check_user_to_relation_with_current_board_in_serializer(self, instance)
         projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,

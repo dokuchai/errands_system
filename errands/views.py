@@ -14,7 +14,8 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
                           CheckPointUpdateSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
-    check_request_user_to_relation_with_current_task
+    check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
+    check_request_user_is_board_owner
 
 
 class IconsListView(ListAPIView):
@@ -148,6 +149,7 @@ class BoardFriendsView(ListAPIView):
     serializer_class = BoardFriendSerializer
 
     def get_queryset(self):
+        check_user_to_relation_with_current_board(self)
         friends = FriendBoardPermission.objects.filter(board=self.kwargs["pk"])
         return friends
 
@@ -157,11 +159,13 @@ class FriendView(RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
+        check_user_to_relation_with_current_board(self)
         return FriendBoardPermission.objects.get(friend_id=self.kwargs['pk2'], board_id=self.kwargs['pk'])
 
 
 class DeleteExecutorView(APIView):
     def post(self, request, pk):
+        check_request_user_is_board_owner(self)
         try:
             task, user = Tasks.objects.get(id=pk), CustomUser.objects.get(id=request.data.get('id'))
             if user in task.so_executors.all():
@@ -178,6 +182,7 @@ class DeleteExecutorView(APIView):
 
 class DeleteFriendToBoardView(APIView):
     def post(self, request, pk):
+        check_user_to_relation_with_current_board(self)
         try:
             if FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).exists():
                 FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).delete()
@@ -193,6 +198,7 @@ class DeleteFriendToBoardView(APIView):
 
 class AddFriendToBoardView(APIView):
     def post(self, request, pk):
+        check_user_to_relation_with_current_board(self)
         name, user = str(request.data['name']).split(' '), None
         if len(name) == 1:
             user = get_or_create_user(last_name=name[0], first_name='', father_name='')
@@ -206,6 +212,7 @@ class AddFriendToBoardView(APIView):
 
 class ChangeFriendPermissionToBoardView(APIView):
     def post(self, request, pk):
+        check_request_user_is_board_owner(self)
         try:
             friend = FriendBoardPermission.objects.get(board_id=pk, friend_id=request.data['id'])
             friend.redactor = request.data['redactor']

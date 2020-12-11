@@ -81,3 +81,29 @@ class CustomAPIException(exceptions.APIException):
         self.detail = detail
         if status_code is not None:
             self.status_code = status_code
+
+
+def check_user_to_relation_with_current_board(self):
+    board = Boards.objects.get(id=self.kwargs['pk'])
+    if board.status == 'Личная' and board.owner != self.request.user:
+        raise CustomAPIException(
+            {'message': 'Владелец доски сделал ее приватной, Вы не можете взаимодействовать с ней'})
+    elif board.status == 'Для друзей' and self.request.user not in board.friends.all() and \
+            self.request.user != board.owner:
+        raise CustomAPIException({'message': 'Вы не являетесь участником доски'})
+
+
+def check_user_to_relation_with_current_board_in_serializer(self, instance):
+    if instance.status == 'Личная' and instance.owner != self.context['user']:
+        raise CustomAPIException(
+            {'message': 'Это личная доска другого пользователя, Вы не можете посмотреть содержимое'})
+    elif instance.status == 'Для друзей' and self.context['user'] != instance.owner and self.context['user'] not \
+            in instance.friends.all():
+        raise CustomAPIException(
+            {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
+
+
+def check_request_user_is_board_owner(self):
+    board = Boards.objects.get(id=self.kwargs['pk'])
+    if board.owner != self.request.user:
+        raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})

@@ -36,7 +36,10 @@ class RegisterUserView(APIView):
             return Response({'message': 'Пользователь с таким email уже зарегистрирован!'}, status=HTTP_400_BAD_REQUEST)
         if register_serializer.data['password'] != register_serializer.data['password_confirm']:
             return Response({'message': 'Пароли не совпадают!'}, status=HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.create(email=register_serializer.data['email'])
+        user = CustomUser.objects.create(email=register_serializer.data['email'],
+                                         first_name=register_serializer.data['first_name'],
+                                         last_name=register_serializer.data['last_name'],
+                                         father_name=register_serializer.data['father_name'])
         user.set_password(register_serializer.data['password'])
         user.save()
         return token_stuff(user=user)

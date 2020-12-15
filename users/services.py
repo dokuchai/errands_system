@@ -1,6 +1,6 @@
 from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
-from rest_framework.status import HTTP_200_OK, HTTP_404_NOT_FOUND, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 
 from .authentication import token_expire_handler, expires_in
 from .models import CustomUser
@@ -35,11 +35,16 @@ def user_partial_update(request, serializer):
     user.father_name = serializer.data['father_name']
     user.subdivision = serializer.data['subdivision']
     user.position = serializer.data['position']
+    user.save()
+    return user
+
+
+def custom_password_validate(request, serializer):
+    user = CustomUser.objects.get(id=request.user.id)
     password, password_confirm = serializer.data['password'], serializer.data['password_confirm']
-    if len(password) > 7 and password == password_confirm:
-        user.set_password(password)
-        user.save()
-        return user
-    else:
+    if len(password) < 8 and password != password_confirm:
         raise CustomAPIException({'detail': 'Пароль должен состоять из минимум 8 символов'},
                                  status_code=HTTP_400_BAD_REQUEST)
+    user.set_password(password)
+    user.save()
+    return user

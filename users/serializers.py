@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from .models import CustomUser
 
 
 class CustomUserSerializer(serializers.Serializer):
@@ -33,5 +32,8 @@ class UserProfileSerializer(serializers.Serializer):
     father_name = serializers.CharField(allow_blank=True, required=False)
     subdivision = serializers.CharField(allow_blank=True, required=False)
     position = serializers.CharField(allow_blank=True, required=False)
+
+
+class UserPasswordRefresh(serializers.Serializer):
     password = serializers.CharField(allow_blank=True, required=False)
     password_confirm = serializers.CharField(allow_blank=True, required=False)

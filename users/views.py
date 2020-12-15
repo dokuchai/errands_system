@@ -3,16 +3,16 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
-    HTTP_404_NOT_FOUND,
-    HTTP_401_UNAUTHORIZED
+    HTTP_404_NOT_FOUND
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from errands.services import password_reset
-from .serializers import UserSignInSerializer, UserRegisterSerializer, UserProfileSerializer, CustomUserSerializer
+from .serializers import UserSignInSerializer, UserRegisterSerializer, UserProfileSerializer, CustomUserSerializer, \
+    UserPasswordRefresh
 from .models import CustomUser
-from .services import token_stuff, user_partial_update
+from .services import token_stuff, user_partial_update, custom_password_validate
 
 
 class CustomUserTokenCreateOrRefresh(APIView):
@@ -63,12 +63,22 @@ class ProfileUserView(APIView):
         return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
 
     @staticmethod
-    def post(request):
+    def put(request):
         profile_serializer = UserProfileSerializer(data=request.data)
         if not profile_serializer.is_valid():
             return Response(profile_serializer.errors, status=HTTP_400_BAD_REQUEST)
-        if profile_serializer.data['password'] != profile_serializer.data['password_confirm']:
+        return Response(CustomUserSerializer(user_partial_update(request, profile_serializer)).data, status=HTTP_200_OK)
+
+
+class PasswordRefreshView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def post(request):
+        password_serializer = UserPasswordRefresh(data=request.data)
+        if not password_serializer.is_valid():
+            return Response(password_serializer.errors, status=HTTP_400_BAD_REQUEST)
+        if password_serializer.data['password'] != password_serializer.data['password_confirm']:
             return Response({'detail': 'Пароли не совпадают!'}, status=HTTP_400_BAD_REQUEST)
-        user = CustomUser.objects.get(id=request.user.id)
-        user_partial_update(request=request, serializer=profile_serializer)
-        return Response(CustomUserSerializer(user).data, status=HTTP_200_OK)
+        custom_password_validate(request, password_serializer)
+        return Response({'detail': 'Пароль успешно изменен'})

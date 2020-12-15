@@ -19,11 +19,3 @@ def token_stuff(user):
         'created': token.created,
         'token': token.key
     }, status=HTTP_200_OK)
-
-
-def check_token(request):
-    try:
-        Token.objects.get(key=request.data['token'])
-        return Response({'message': True}, status=HTTP_200_OK)
-    except Token.DoesNotExist:
-        return Response({'message': False}, status=HTTP_404_NOT_FOUND)

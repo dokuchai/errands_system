@@ -1,5 +1,8 @@
+import requests
+from django.http import HttpResponseRedirect, JsonResponse
 from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
+from rest_framework.response import Response
 
 from errands.models import Boards, Tasks, Icons
 from users.models import CustomUser
@@ -107,3 +110,35 @@ def check_request_user_is_board_owner(self):
     board = Boards.objects.get(id=self.kwargs['pk'])
     if board.owner != self.request.user:
         raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})
+
+
+def reset_user_password(request, uid, token):
+    if request.method == 'GET':
+        return JsonResponse({'uid': uid, 'token': token})
+    if request.method == 'POST':
+        password = request.POST.get('password1')
+        payload = {'token': token, 'new_password': password, 'uid': uid}
+        url = 'https://back-missions.admlr.lipetsk.ru/auth/users/reset_password_confirm/'
+        response = requests.post(url, data=payload)
+        if response.status_code == 204:
+            """need change redirect url"""
+            return HttpResponseRedirect('https://todo.admlr.lipetsk.ru/signin/')
+        else:
+            return JsonResponse({'message': 'fail data'})
+
+
+def password_reset(email):
+    url = "https://back-missions.admlr.lipetsk.ru/auth/users/reset_password/"
+    payload = f'email={email}'
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'CSRFToken': 'users.authentication.ExpiringTokenAuthentication'
+    }
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if response.status_code == 204:
+        context = {'success': True,
+                   'message': 'Успешно. На Ваш почтовый ящик направлено письмо со ссылкой на сброс пароля'}
+        return Response(context).data
+    elif response.status_code == 400:
+        context = {'success': False, 'message': 'Пользователь с таким Email не найден'}
+        return Response(context).data

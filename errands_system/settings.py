@@ -93,6 +93,12 @@ REST_FRAMEWORK = {
     ),
 }
 TOKEN_EXPIRED_AFTER_SECONDS = 604800
+
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'reset/{uid}/{token}/',
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+}
+
 LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Moscow'
@@ -117,3 +123,9 @@ FILE_UPLOAD_PERMISSIONS = 0o757
 # DEBUG_TOOLBAR_CONFIG = {
 #     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
 # }
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 587
+EMAIL_HOST_USER = 'obu.its@yandex.ru'
+EMAIL_HOST_PASSWORD = 'OBUITC48'
+DEFAULT_FROM_EMAIL = 'obu.its@yandex.ru'

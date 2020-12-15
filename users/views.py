@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate
 from rest_framework.status import (
+    HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from errands.services import password_reset
 from .serializers import UserSignInSerializer, UserRegisterSerializer
 from .models import CustomUser
-from .services import token_stuff, check_token
+from .services import token_stuff
 
 
 class CustomUserTokenCreateOrRefresh(APIView):
@@ -45,6 +47,7 @@ class RegisterUserView(APIView):
         return token_stuff(user=user)
 
 
-class CheckTokenView(APIView):
+class ResetPasswordView(APIView):
     def post(self, request):
-        return check_token(request)
+        email = request.data.get('email')
+        return Response(password_reset(email=email), status=HTTP_200_OK)

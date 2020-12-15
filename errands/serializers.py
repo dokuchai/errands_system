@@ -311,6 +311,12 @@ class ProjectsSerializer(serializers.ModelSerializer):
         return TaskListSerializer(tasks, many=True).data
 
 
+class ProjectListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ('id', 'title')
+
+
 class ProjectsWithActiveTasksSerializer(serializers.ModelSerializer):
     project = serializers.CharField(source='title')
     tasks = serializers.SerializerMethodField('get_active_tasks')

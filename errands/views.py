@@ -11,7 +11,7 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer)
+                          CheckPointUpdateSerializer, ProjectListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
@@ -152,6 +152,15 @@ class BoardFriendsView(ListAPIView):
         check_user_to_relation_with_current_board(self)
         friends = FriendBoardPermission.objects.filter(board=self.kwargs["pk"])
         return friends
+
+
+class ActiveBoardProjects(ListAPIView):
+    serializer_class = ProjectListSerializer
+
+    def get_queryset(self):
+        check_user_to_relation_with_current_board(self)
+        projects = Project.objects.filter(project_tasks__board_id=self.kwargs['pk'])
+        return projects
 
 
 class FriendView(RetrieveAPIView):

@@ -2,7 +2,7 @@ from django.urls import path
 from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView, IconsListView, BoardFriendsView,
                     FriendView, DeleteExecutorView, BoardTasksActiveView, BoardsListView, ISUView, ChangeLogsTaskView,
                     AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
-                    CommentsView, FileDelete)
+                    CommentsView, FileDelete, ActiveBoardProjects)
 
 urlpatterns = [
     path('boards/', BoardsListView.as_view()),
@@ -10,6 +10,7 @@ urlpatterns = [
     path('board/<int:pk>/active-tasks/', BoardTasksActiveView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/isu/', ISUView.as_view()),
     path('board/<int:pk>/create-task/', TaskCreateView.as_view()),
+    path('board/<int:pk>/projects/', ActiveBoardProjects.as_view()),
     path('board/<int:pk>/friends/', BoardFriendsView.as_view()),
     path('board/<int:pk>/friend/<int:pk2>/', FriendView.as_view()),
     path('board/<int:pk>/add-friend/', AddFriendToBoardView.as_view()),

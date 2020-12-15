@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
+    'drf_yasg',
     'changelog.apps.ChangelogConfig',
     'errands.apps.ErrandsConfig',
     'django_cleanup.apps.CleanupConfig',
@@ -98,7 +99,9 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'reset/{uid}/{token}/',
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
 }
-
+SWAGGER_SETTINGS = {
+    "USE_SESSION_AUTH": False
+}
 LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'Europe/Moscow'

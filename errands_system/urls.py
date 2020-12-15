@@ -4,6 +4,7 @@ from django.urls import path, include
 
 from errands.services import reset_user_password
 from users.views import CustomUserTokenCreateOrRefresh, RegisterUserView, ResetPasswordView
+from .yasg import urlpatterns as swagger_urls
 
 urlpatterns = [
     path('signin/', CustomUserTokenCreateOrRefresh.as_view()),
@@ -14,3 +15,4 @@ urlpatterns = [
     path('', include('errands.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]
+urlpatterns += swagger_urls

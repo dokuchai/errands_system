@@ -159,7 +159,7 @@ class ActiveBoardProjects(ListAPIView):
 
     def get_queryset(self):
         check_user_to_relation_with_current_board(self)
-        projects = Project.objects.filter(project_tasks__board_id=self.kwargs['pk'])
+        projects = Project.objects.filter(project_tasks__board_id=self.kwargs['pk']).distinct()
         return projects
 
 

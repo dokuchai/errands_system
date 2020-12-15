@@ -27,7 +27,7 @@ def user_partial_update(request, serializer):
     user = CustomUser.objects.get(id=request.user.id)
     if serializer.data['email']:
         if CustomUser.objects.filter(email=serializer.data['email']) and user.email != serializer.data['email']:
-            raise CustomAPIException({'message': 'Данный email зарегистрирован на другого пользователя'},
+            raise CustomAPIException({'detail': 'Данный email зарегистрирован на другого пользователя'},
                                      status_code=HTTP_400_BAD_REQUEST)
         user.email = serializer.data['email']
     user.first_name = serializer.data['first_name']
@@ -41,5 +41,5 @@ def user_partial_update(request, serializer):
         user.save()
         return user
     else:
-        raise CustomAPIException({'message': 'Пароль должен состоять из минимум 8 символов'},
+        raise CustomAPIException({'detail': 'Пароль должен состоять из минимум 8 символов'},
                                  status_code=HTTP_400_BAD_REQUEST)

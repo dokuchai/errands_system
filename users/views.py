@@ -68,7 +68,7 @@ class ProfileUserView(APIView):
         if not profile_serializer.is_valid():
             return Response(profile_serializer.errors, status=HTTP_400_BAD_REQUEST)
         if profile_serializer.data['password'] != profile_serializer.data['password_confirm']:
-            return Response({'message': 'Пароли не совпадают!'}, status=HTTP_400_BAD_REQUEST)
+            return Response({'detail': 'Пароли не совпадают!'}, status=HTTP_400_BAD_REQUEST)
         user = CustomUser.objects.get(id=request.user.id)
         user_partial_update(request=request, serializer=profile_serializer)
         return Response(CustomUserSerializer(user).data, status=HTTP_200_OK)

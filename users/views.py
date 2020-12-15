@@ -8,9 +8,9 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from errands.services import password_reset
-from .serializers import UserSignInSerializer, UserRegisterSerializer
+from .serializers import UserSignInSerializer, UserRegisterSerializer, UserProfileSerializer, CustomUserSerializer
 from .models import CustomUser
-from .services import token_stuff
+from .services import token_stuff, user_partial_update
 
 
 class CustomUserTokenCreateOrRefresh(APIView):
@@ -51,3 +51,20 @@ class ResetPasswordView(APIView):
     def post(self, request):
         email = request.data.get('email')
         return Response(password_reset(email=email), status=HTTP_200_OK)
+
+
+class ProfileUserView(APIView):
+    @staticmethod
+    def get(request):
+        return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
+
+    @staticmethod
+    def post(request):
+        profile_serializer = UserProfileSerializer(data=request.data)
+        if not profile_serializer.is_valid():
+            return Response(profile_serializer.errors, status=HTTP_400_BAD_REQUEST)
+        if profile_serializer.data['password'] != profile_serializer.data['password_confirm']:
+            return Response({'message': 'Пароли не совпадают!'}, status=HTTP_400_BAD_REQUEST)
+        user = CustomUser.objects.get(id=request.user.id)
+        user_partial_update(request=request, serializer=profile_serializer)
+        return Response(CustomUserSerializer(user).data, status=HTTP_200_OK)

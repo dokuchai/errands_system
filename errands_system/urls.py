@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.urls import path, include
 
 from errands.services import reset_user_password
-from users.views import CustomUserTokenCreateOrRefresh, RegisterUserView, ResetPasswordView
+from users.views import CustomUserTokenCreateOrRefresh, RegisterUserView, ResetPasswordView, ProfileUserView
 from .yasg import urlpatterns as swagger_urls
 
 urlpatterns = [
@@ -12,6 +12,7 @@ urlpatterns = [
     path('password-reset/', ResetPasswordView.as_view()),
     path('reset/<slug:uid>/<slug:token>/', reset_user_password, name='reset'),
     path('admin/', admin.site.urls),
+    path('profile/', ProfileUserView.as_view()),
     path('', include('errands.urls')),
     path('__debug__/', include(debug_toolbar.urls)),
 ]

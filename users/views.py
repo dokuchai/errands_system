@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
@@ -55,12 +56,11 @@ class ResetPasswordView(APIView):
 
 
 class ProfileUserView(APIView):
+    permission_classes = [IsAuthenticated]
+
     @staticmethod
     def get(request):
-        try:
-            return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
-        except CustomUser.DoesNotExist:
-            return Response({'message': 'Вы не авторизованы'}, status=HTTP_401_UNAUTHORIZED)
+        return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
 
     @staticmethod
     def post(request):

@@ -3,6 +3,7 @@ from rest_framework.status import (
     HTTP_200_OK,
     HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND,
+    HTTP_401_UNAUTHORIZED
 )
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -59,7 +60,7 @@ class ProfileUserView(APIView):
         try:
             return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
         except CustomUser.DoesNotExist:
-            return Response({'message': 'Пользователя не существует'}, status=HTTP_404_NOT_FOUND)
+            return Response({'message': 'Вы не авторизованы'}, status=HTTP_401_UNAUTHORIZED)
 
     @staticmethod
     def post(request):

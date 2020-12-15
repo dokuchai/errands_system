@@ -56,7 +56,10 @@ class ResetPasswordView(APIView):
 class ProfileUserView(APIView):
     @staticmethod
     def get(request):
-        return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
+        try:
+            return Response(CustomUserSerializer(CustomUser.objects.get(id=request.user.id)).data)
+        except CustomUser.DoesNotExist:
+            return Response({'message': 'Пользователя не существует'}, status=HTTP_404_NOT_FOUND)
 
     @staticmethod
     def post(request):

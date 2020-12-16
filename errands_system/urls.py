@@ -2,17 +2,17 @@ import debug_toolbar
 from django.contrib import admin
 from django.urls import path, include
 
-from errands.services import reset_user_password
-from users.views import CustomUserTokenCreateOrRefresh, RegisterUserView, ResetPasswordView, ProfileUserView, \
-    PasswordRefreshView
+from users.views import CustomUserTokenCreateOrRefresh, RegisterUserView, SendMailResetPasswordView, ProfileUserView, \
+    PasswordRefreshView, ResetPasswordView
 from .yasg import urlpatterns as swagger_urls
 
 urlpatterns = [
+    path('auth/', include('rest_registration.api.urls')),
     path('signin/', CustomUserTokenCreateOrRefresh.as_view()),
     path('register/', RegisterUserView.as_view()),
-    path('password-reset/', ResetPasswordView.as_view()),
+    path('send-mail-password-reset/', SendMailResetPasswordView.as_view()),
     path('password-refresh/', PasswordRefreshView.as_view()),
-    path('reset/<slug:uid>/<slug:token>/', reset_user_password, name='reset'),
+    path('password-reset/', ResetPasswordView.as_view()),
     path('admin/', admin.site.urls),
     path('profile/', ProfileUserView.as_view()),
     path('', include('errands.urls')),

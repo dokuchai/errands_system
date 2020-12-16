@@ -1,5 +1,4 @@
 import requests
-from django.http import HttpResponseRedirect, JsonResponse
 from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
 from rest_framework.response import Response
@@ -112,33 +111,32 @@ def check_request_user_is_board_owner(self):
         raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})
 
 
-def reset_user_password(request, uid, token):
-    if request.method == 'GET':
-        return JsonResponse({'uid': uid, 'token': token})
-    if request.method == 'POST':
-        password = request.POST.get('password1')
-        payload = {'token': token, 'new_password': password, 'uid': uid}
-        url = 'https://back-missions.admlr.lipetsk.ru/auth/users/reset_password_confirm/'
-        response = requests.post(url, data=payload)
-        if response.status_code == 204:
-            """need change redirect url"""
-            return HttpResponseRedirect('https://todo.admlr.lipetsk.ru/signin/')
-        else:
-            return JsonResponse({'message': 'fail data'})
-
-
-def password_reset(email):
-    url = "https://back-missions.admlr.lipetsk.ru/auth/users/reset_password/"
-    payload = f'email={email}'
+def reset_user_password(user_id, password, timestamp, signature):
+    payload = f'user_id={user_id}&timestamp={timestamp}&signature={signature}&password={password}'
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
-        'CSRFToken': 'users.authentication.ExpiringTokenAuthentication'
+    }
+    # url = 'http://localhost:8000/auth/reset-password/'
+    url = 'https://back-missions.admlr.lipetsk.ru/auth/reset_password/'
+    response = requests.request("POST", url, headers=headers, data=payload)
+    if response.status_code == 200:
+        return Response({'detail': 'Пароль успешно изменен'}).data
+    else:
+        return Response({'detail': 'Неверные данные'}).data
+
+
+def send_mail_password_reset(email):
+    # url = "http://localhost:8000/auth/send-reset-password-link/"
+    url = "https://back-missions.admlr.lipetsk.ru/auth/send-reset-password-link/"
+    payload = f'login={email}'
+    headers = {
+        'Content-Type': 'application/x-www-form-urlencoded',
     }
     response = requests.request("POST", url, headers=headers, data=payload)
-    if response.status_code == 204:
+    if response.status_code == 200:
         context = {'success': True,
-                   'message': 'Успешно. На Ваш почтовый ящик направлено письмо со ссылкой на сброс пароля'}
+                   'detail': 'Успешно. На Ваш почтовый ящик направлено письмо со ссылкой на сброс пароля'}
         return Response(context).data
-    elif response.status_code == 400:
-        context = {'success': False, 'message': 'Пользователь с таким Email не найден'}
+    elif response.status_code == 404:
+        context = {'success': False, 'detail': 'Пользователь с таким Email не найден'}
         return Response(context).data

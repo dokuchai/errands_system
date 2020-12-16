@@ -8,7 +8,7 @@ from rest_framework.status import (
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from errands.services import password_reset
+from errands.services import send_mail_password_reset, reset_user_password
 from .serializers import UserSignInSerializer, UserRegisterSerializer, UserProfileSerializer, CustomUserSerializer, \
     UserPasswordRefresh
 from .models import CustomUser
@@ -49,10 +49,20 @@ class RegisterUserView(APIView):
         return token_stuff(user=user)
 
 
+class SendMailResetPasswordView(APIView):
+    @staticmethod
+    def post(request):
+        email = request.data.get('login')
+        return Response(send_mail_password_reset(email=email), status=HTTP_200_OK)
+
+
 class ResetPasswordView(APIView):
-    def post(self, request):
-        email = request.data.get('email')
-        return Response(password_reset(email=email), status=HTTP_200_OK)
+    @staticmethod
+    def post(request):
+        return Response(
+            reset_user_password(user_id=request.POST.get('user_id'), password=request.POST.get('password'),
+                                timestamp=request.POST.get('timestamp'), signature=request.POST.get('signature')),
+            status=HTTP_200_OK)
 
 
 class ProfileUserView(APIView):

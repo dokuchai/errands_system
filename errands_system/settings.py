@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'djoser',
     'drf_yasg',
+    'rest_registration',
     'changelog.apps.ChangelogConfig',
     'errands.apps.ErrandsConfig',
     'django_cleanup.apps.CleanupConfig',
@@ -132,3 +133,11 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'obu.its@yandex.ru'
 EMAIL_HOST_PASSWORD = 'OBUITC48'
 DEFAULT_FROM_EMAIL = 'obu.its@yandex.ru'
+
+REST_REGISTRATION = {
+    'REGISTER_VERIFICATION_ENABLED': False,
+    'RESET_PASSWORD_VERIFICATION_ENABLED': True,
+    'RESET_PASSWORD_VERIFICATION_URL': 'https://todo.admlr.lipetsk.ru/auth/password-restore/',
+    'REGISTER_EMAIL_VERIFICATION_ENABLED': False,
+    'VERIFICATION_FROM_EMAIL': 'obu.its@yandex.ru',
+}

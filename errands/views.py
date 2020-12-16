@@ -174,7 +174,6 @@ class FriendView(RetrieveAPIView):
 
 class DeleteExecutorView(APIView):
     def post(self, request, pk):
-        check_request_user_is_board_owner(self)
         try:
             task, user = Tasks.objects.get(id=pk), CustomUser.objects.get(id=request.data.get('id'))
             if user in task.so_executors.all():

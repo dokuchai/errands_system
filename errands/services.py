@@ -139,4 +139,4 @@ def send_mail_password_reset(email):
         return Response(context).data
     elif response.status_code == 404:
         context = {'success': False, 'detail': 'Пользователь с таким Email не найден'}
-        return Response(context).data
+        raise CustomAPIException(context, status_code=status.HTTP_404_NOT_FOUND)

@@ -122,7 +122,7 @@ def reset_user_password(user_id, password, timestamp, signature):
     if response.status_code == 200:
         return Response({'detail': 'Пароль успешно изменен'}).data
     else:
-        return Response({'detail': 'Неверные данные'}).data
+        raise CustomAPIException({'detail': 'Неверные данные'}, status_code=status.HTTP_400_BAD_REQUEST)
 
 
 def send_mail_password_reset(email):

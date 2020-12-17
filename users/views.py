@@ -59,8 +59,8 @@ class ResetPasswordView(APIView):
     @staticmethod
     def post(request):
         return Response(
-            reset_user_password(user_id=request.POST.get('user_id'), password=request.POST.get('password'),
-                                timestamp=request.POST.get('timestamp'), signature=request.POST.get('signature')),
+            reset_user_password(user_id=request.data.get('user_id'), password=request.data.get('password'),
+                                timestamp=request.data.get('timestamp'), signature=request.data.get('signature')),
             status=HTTP_200_OK)
 
 

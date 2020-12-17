@@ -117,7 +117,7 @@ def reset_user_password(user_id, password, timestamp, signature):
         'Content-Type': 'application/x-www-form-urlencoded',
     }
     # url = 'http://localhost:8000/auth/reset-password/'
-    url = 'https://back-missions.admlr.lipetsk.ru/auth/reset_password/'
+    url = 'https://back-missions.admlr.lipetsk.ru/auth/reset-password/'
     response = requests.request("POST", url, headers=headers, data=payload)
     if response.status_code == 200:
         return Response({'detail': 'Пароль успешно изменен'}).data

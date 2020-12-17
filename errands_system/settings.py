@@ -138,7 +138,7 @@ REST_REGISTRATION = {
     'REGISTER_VERIFICATION_ENABLED': False,
     'SEND_RESET_PASSWORD_LINK_SERIALIZER_USE_EMAIL': True,
     'RESET_PASSWORD_VERIFICATION_ENABLED': True,
-    'RESET_PASSWORD_VERIFICATION_URL': 'https://todo.admlr.lipetsk.ru/auth/password-restore/',
+    'RESET_PASSWORD_VERIFICATION_URL': 'https://todo.admlr.lipetsk.ru/auth/password_restore',
     'REGISTER_EMAIL_VERIFICATION_ENABLED': False,
     'RESET_PASSWORD_VERIFICATION_EMAIL_TEMPLATES': {'body': 'reset_password/body.txt',
                                                     'subject': 'reset_password/subject.txt'},

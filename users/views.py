@@ -52,8 +52,7 @@ class RegisterUserView(APIView):
 class SendMailResetPasswordView(APIView):
     @staticmethod
     def post(request):
-        email = request.data.get('login')
-        return Response(send_mail_password_reset(email=email), status=HTTP_200_OK)
+        return Response(send_mail_password_reset(email=request.data.get('email')), status=HTTP_200_OK)
 
 
 class ResetPasswordView(APIView):

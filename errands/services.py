@@ -126,9 +126,9 @@ def reset_user_password(user_id, password, timestamp, signature):
 
 
 def send_mail_password_reset(email):
-    # url = "http://localhost:8000/auth/send-reset-password-link/"
-    url = "https://back-missions.admlr.lipetsk.ru/auth/send-reset-password-link/"
-    payload = f'login={email}'
+    url = "http://localhost:8000/auth/send-reset-password-link/"
+    # url = "https://back-missions.admlr.lipetsk.ru/auth/send-reset-password-link/"
+    payload = f'email={email}'
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
     }

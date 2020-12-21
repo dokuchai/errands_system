@@ -116,7 +116,6 @@ def reset_user_password(user_id, password, timestamp, signature):
     headers = {
         'Content-Type': 'application/x-www-form-urlencoded',
     }
-    # url = 'http://localhost:8000/auth/reset-password/'
     url = 'https://back-missions.admlr.lipetsk.ru/auth/reset-password/'
     response = requests.request("POST", url, headers=headers, data=payload)
     if response.status_code == 200:
@@ -126,7 +125,6 @@ def reset_user_password(user_id, password, timestamp, signature):
 
 
 def send_mail_password_reset(email):
-    # url = "http://localhost:8000/auth/send-reset-password-link/"
     url = "https://back-missions.admlr.lipetsk.ru/auth/send-reset-password-link/"
     payload = f'email={email}'
     headers = {
@@ -140,3 +138,10 @@ def send_mail_password_reset(email):
     elif response.status_code == 404:
         context = {'success': False, 'detail': 'Пользователь с таким Email не найден'}
         raise CustomAPIException(context, status_code=status.HTTP_404_NOT_FOUND)
+
+
+# def get_revision_tasks(request, pk):
+#     tasks_array = request.data.get('tasks')
+#     tasks = [Tasks.objects.get(board_id=pk, id=task_id['id']) for task_id in tasks_array]
+#     revision_tasks = list(map(lambda task: ++task.version, tasks))
+#     return revision_tasks

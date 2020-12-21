@@ -16,6 +16,7 @@ urlpatterns = [
     path('board/<int:pk>/add-friend/', AddFriendToBoardView.as_view()),
     path('board/<int:pk>/friend-permission/', ChangeFriendPermissionToBoardView.as_view()),
     path('board/<int:pk>/delete-friend/', DeleteFriendToBoardView.as_view()),
+    # path('board/<int:pk>/revision/', RevisionView.as_view()),
     path('task/<int:pk>/', TaskRetrieveUpdateView.as_view({"get": "retrieve", "put": "partial_update"})),
     path('task/<int:pk>/delete-executor/', DeleteExecutorView.as_view()),
     path('task/<int:pk>/changelogs/', ChangeLogsTaskView.as_view()),

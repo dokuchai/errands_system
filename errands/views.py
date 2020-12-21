@@ -375,3 +375,8 @@ class FileDelete(APIView):
         else:
             return Response({'message': 'У вас недостаточно прав для удаления файла'},
                             status=status.HTTP_400_BAD_REQUEST)
+
+
+# class RevisionView(APIView):
+#     def post(self, request, pk):
+#         return Response(TaskListSerializer(get_revision_tasks(request, pk), many=True).data, status=status.HTTP_200_OK)

@@ -96,7 +96,8 @@ def hide_request_to_isu(instance):
 
 def check_request_user_to_relation_with_current_task(task_id, request):
     task = Tasks.objects.get(id=task_id)
-    if request.user in task.so_executors.all() or task.responsible == request.user or task.board.owner == request.user:
+    if request.user in task.so_executors.all() or task.responsible == request.user or task.board.owner == request.user \
+            or task.board.status == 'Общая':
         return True
     else:
         return False

@@ -234,7 +234,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         friend = FriendBoardPermission.objects.filter(board_id=instance.board.id, friend_id=self.context['user'].id)
         try:
-            if instance.board.owner == self.context['user'] or friend.redactor:
+            if instance.board.owner == self.context['user'] or friend.redactor or instance.board.status == 'Общая':
                 instance.title = validated_data.get('title', instance.title)
                 instance.text = validated_data.get('text', instance.text)
                 instance.term = validated_data.get('term', instance.term)

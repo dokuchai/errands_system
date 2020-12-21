@@ -219,12 +219,13 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     exec_id = serializers.ListField(default=[])
     exec_name = serializers.ListField(default=[])
     files = FileSerializer(many=True)
+    check_points = CheckPointSerializer(many=True)
 
     class Meta:
         model = Tasks
         fields = (
             'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status',
-            'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name', 'files')
+            'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name', 'files', 'check_points')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

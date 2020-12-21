@@ -6,7 +6,7 @@ from rest_framework import serializers
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_responsible, add_new_user, CustomAPIException, \
-    check_user_to_relation_with_current_board_in_serializer
+    check_user_to_relation_with_current_board_in_serializer, hide_request_to_isu
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -343,6 +343,7 @@ class BoardBaseSerializer(serializers.BaseSerializer, ABC):
     def to_representation(self, instance):
         check_user_to_relation_with_current_board_in_serializer(self, instance)
         projects = Project.objects.filter(project_tasks__board_id=instance.id).distinct()
+        hide_request_to_isu(instance)
         tasks = Tasks.objects.filter(board=instance, project=None).order_by(F('term').asc(nulls_last=True))
         return {
             "id": instance.id,
@@ -359,6 +360,7 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         check_user_to_relation_with_current_board_in_serializer(self, instance)
         projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
+        hide_request_to_isu(instance)
         tasks = Tasks.objects.filter(board=instance, project=None,
                                      status__in=('В работе', 'Требуется помощь')).order_by(
             F('term').asc(nulls_last=True), 'id')

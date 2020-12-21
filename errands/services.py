@@ -3,7 +3,7 @@ from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
 from rest_framework.response import Response
 
-from errands.models import Boards, Tasks, Icons
+from errands.models import Boards, Tasks, Icons, Project
 from users.models import CustomUser
 
 
@@ -65,6 +65,33 @@ def get_or_create_isu_tasks(items, board, responsible_full_name, tasks, project,
                                                             term=item['deadline'], icon_id=message_and_icon['icon'])
                 if created:
                     tasks.append(task)
+
+
+def hide_request_to_isu(instance):
+    url = f"http://isuapi.admlr.lipetsk.ru/api/get-ambulance-messages"
+    payload = {}
+    headers = {}
+    response = requests.request("GET", url, headers=headers, data=payload)
+    content = dict(response.json())
+    death_escalation = content['data']['death_escalation']
+    ambulances = content['data']['ambulance']
+    test_output = content['data']['test_output']
+    board = Boards.objects.get(id=instance.id)
+    tasks = []
+    project_death, project_death_created = Project.objects.get_or_create(title='Смертность')
+    project_ambulance, project_ambulance_created = Project.objects.get_or_create(title='Скорая')
+    responsible = CustomUser.objects.get(first_name=board.owner.first_name, last_name=board.owner.last_name,
+                                         father_name=board.owner.father_name, boards=board)
+    responsible_full_name = f"{responsible.last_name} {responsible.first_name} {responsible.father_name}"
+    if ambulances:
+        get_or_create_isu_tasks(items=ambulances, board=board, responsible_full_name=responsible_full_name,
+                                tasks=tasks, project=project_ambulance, responsible=responsible)
+    if death_escalation:
+        get_or_create_isu_tasks(items=death_escalation, board=board, responsible_full_name=responsible_full_name,
+                                tasks=tasks, project=project_death, responsible=responsible)
+    if test_output:
+        get_or_create_isu_tasks(items=test_output, board=board, responsible_full_name=responsible_full_name,
+                                tasks=tasks, project=project_death, responsible=responsible)
 
 
 def check_request_user_to_relation_with_current_task(task_id, request):
@@ -138,7 +165,6 @@ def send_mail_password_reset(email):
     elif response.status_code == 404:
         context = {'success': False, 'detail': 'Пользователь с таким Email не найден'}
         raise CustomAPIException(context, status_code=status.HTTP_404_NOT_FOUND)
-
 
 # def get_revision_tasks(request, pk):
 #     tasks_array = request.data.get('tasks')

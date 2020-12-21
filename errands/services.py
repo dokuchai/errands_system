@@ -177,7 +177,7 @@ def check_user_redactor(self, instance):
             return True
         else:
             return False
-    except AssertionError:
+    except FriendBoardPermission.DoesNotExist:
         return False
 # def get_revision_tasks(request, pk):
 #     tasks_array = request.data.get('tasks')

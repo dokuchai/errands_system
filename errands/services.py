@@ -3,7 +3,7 @@ from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
 from rest_framework.response import Response
 
-from errands.models import Boards, Tasks, Icons, Project
+from errands.models import Boards, Tasks, Icons, Project, FriendBoardPermission
 from users.models import CustomUser
 
 
@@ -167,6 +167,18 @@ def send_mail_password_reset(email):
         context = {'success': False, 'detail': 'Пользователь с таким Email не найден'}
         raise CustomAPIException(context, status_code=status.HTTP_404_NOT_FOUND)
 
+
+def check_user_redactor(self, instance):
+    if instance.board.status == 'Общая':
+        return True
+    try:
+        friend = FriendBoardPermission.objects.get(board_id=instance.board.id, friend_id=self.context['user'].id)
+        if friend.redactor:
+            return True
+        else:
+            return False
+    except AssertionError:
+        return False
 # def get_revision_tasks(request, pk):
 #     tasks_array = request.data.get('tasks')
 #     tasks = [Tasks.objects.get(board_id=pk, id=task_id['id']) for task_id in tasks_array]

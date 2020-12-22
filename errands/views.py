@@ -68,10 +68,10 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
             return TaskUpdateSerializer
 
     def perform_update(self, serializer):
-        if 'check_points' in self.request.data and self.request.data['check_points']:
-            for checkpoint in self.request.data['check_points']:
-                CheckPoint.objects.create(date=checkpoint['date'], text=checkpoint['text'], status=checkpoint['status'],
-                                          task_id=self.kwargs['pk'])
+        # if 'check_points' in self.request.data and self.request.data['check_points']:
+        #     for checkpoint in self.request.data['check_points']:
+        #         CheckPoint.objects.create(date=checkpoint['date'], text=checkpoint['text'], status=checkpoint['status'],
+        #                                   task_id=self.kwargs['pk'])
         if self.request.FILES:
             for file in self.request.FILES.getlist('files'):
                 file_obj = File.objects.create(file=file, task_id=self.kwargs['pk'])

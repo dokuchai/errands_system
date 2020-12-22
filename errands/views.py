@@ -69,6 +69,7 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         if 'checkpoints' in self.request.data:
+            """I don't know, how it is working without underscore, but this working"""
             for checkpoint in self.request.data.get('checkpoints'):
                 CheckPoint.objects.create(date=checkpoint['date'], text=checkpoint['text'], status=checkpoint['status'],
                                           task_id=self.kwargs['pk'])

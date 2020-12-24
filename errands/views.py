@@ -10,8 +10,8 @@ from changelog.models import ChangeLog
 from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
-                          TaskCreateSerializer, BoardActiveTasksSerializer, TaskListSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer, ProjectListSerializer)
+                          TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
+                          CheckPointUpdateSerializer, ProjectListSerializer, CheckPointOutputSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
@@ -284,9 +284,9 @@ class CheckPointView(APIView):
     def post(self, request, pk):
         serializer = CheckPointSerializer(data=request.data)
         if serializer.is_valid():
-            checkpoint = CheckPoint.objects.create(date=serializer.data['date'], text=serializer.data['text'],
+            checkpoint = CheckPoint.objects.create(date=serializer.validated_data['date'], text=serializer.data['text'],
                                                    task_id=pk)
-            return Response(CheckPointSerializer(checkpoint).data, status=status.HTTP_201_CREATED)
+            return Response(CheckPointOutputSerializer(checkpoint).data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -298,13 +298,13 @@ class CheckPointView(APIView):
                 try:
                     checkpoint = CheckPoint.objects.get(id=request.data['id'], task_id=pk)
                     if 'date' in request.data:
-                        checkpoint.date = serializer.data['date']
+                        checkpoint.date = serializer.validated_data['date']
                     if 'text' in request.data:
                         checkpoint.text = serializer.data['text']
                     if 'status' in request.data:
                         checkpoint.status = serializer.data['status']
                     checkpoint.save()
-                    return Response(CheckPointSerializer(checkpoint).data, status=status.HTTP_200_OK)
+                    return Response(CheckPointOutputSerializer(checkpoint).data, status=status.HTTP_200_OK)
                 except CheckPoint.DoesNotExist:
                     return Response({'message': 'Чек-поинта не существует!'}, status=status.HTTP_404_NOT_FOUND)
             else:

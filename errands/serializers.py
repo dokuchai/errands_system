@@ -33,6 +33,10 @@ class CheckPointUpdateSerializer(CheckPointSerializer):
     date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
 
 
+class CheckPointOutputSerializer(CheckPointSerializer):
+    date = serializers.DateTimeField(format="%d.%m.%Y", required=False)
+
+
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
@@ -167,7 +171,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
     redactor = serializers.SerializerMethodField('check_redactor')
-    check_points = CheckPointSerializer(many=True)
+    check_points = CheckPointOutputSerializer(many=True)
     comments = CommentSerializer(many=True)
     files = FileSerializer(many=True)
 
@@ -222,7 +226,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     exec_id = serializers.ListField(default=[])
     exec_name = serializers.ListField(default=[])
     files = FileSerializer(many=True)
-    check_points = CheckPointSerializer(many=True)
+    check_points = CheckPointOutputSerializer(many=True)
 
     class Meta:
         model = Tasks

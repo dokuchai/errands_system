@@ -320,6 +320,12 @@ class CheckPointView(APIView):
             return Response({"message": "Чекпоинта не существует!"}, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ClearCheckPointsView(APIView):
+    def delete(self, request, pk):
+        CheckPoint.objects.filter(task_id=pk).delete()
+        return Response({"message": "Очищено"}, status=status.HTTP_204_NO_CONTENT)
+
+
 class CommentsView(APIView):
     def post(self, request, pk):
         user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)

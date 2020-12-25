@@ -34,7 +34,7 @@ class CheckPointUpdateSerializer(CheckPointSerializer):
 
 
 class CheckPointOutputSerializer(CheckPointSerializer):
-    date = serializers.DateTimeField(format="%d.%m.%Y", required=False)
+    date = serializers.DateTimeField(format="%Y-%m-%d", required=False)
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):

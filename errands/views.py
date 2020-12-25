@@ -10,11 +10,11 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer, ProjectListSerializer)
+                          CheckPointUpdateSerializer, ProjectListSerializer, TaskListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
-    check_request_user_is_board_owner
+    check_request_user_is_board_owner, get_revision_tasks
 
 
 class IconsListView(ListAPIView):
@@ -354,6 +354,7 @@ class FileDelete(APIView):
             return Response({'message': 'У вас недостаточно прав для удаления файла'},
                             status=status.HTTP_400_BAD_REQUEST)
 
-# class RevisionView(APIView):
-#     def post(self, request, pk):
-#         return Response(TaskListSerializer(get_revision_tasks(request, pk), many=True).data, status=status.HTTP_200_OK)
+
+class RevisionView(APIView):
+    def post(self, request, pk):
+        return Response(TaskListSerializer(get_revision_tasks(request, pk), many=True).data, status=status.HTTP_200_OK)

@@ -5,8 +5,8 @@ from rest_framework import serializers
 
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
-from .services import add_new_responsible, add_new_user, CustomAPIException, \
-    check_user_to_relation_with_current_board_in_serializer, hide_request_to_isu, check_user_redactor
+from .services import add_new_responsible, add_new_user, check_user_to_relation_with_current_board_in_serializer, \
+    hide_request_to_isu, check_user_redactor
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -22,7 +22,7 @@ class FileSerializer(serializers.ModelSerializer):
 
 
 class CheckPointSerializer(serializers.ModelSerializer):
-    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"])
+    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], format="%Y-%m-%d")
 
     class Meta:
         model = CheckPoint
@@ -30,11 +30,8 @@ class CheckPointSerializer(serializers.ModelSerializer):
 
 
 class CheckPointUpdateSerializer(CheckPointSerializer):
-    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
-
-
-class CheckPointOutputSerializer(CheckPointSerializer):
-    date = serializers.DateTimeField(format="%Y-%m-%d", required=False)
+    date = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False,
+                                     format="%Y-%m-%d")
 
 
 class CommentCreateSerializer(serializers.ModelSerializer):
@@ -171,7 +168,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
     redactor = serializers.SerializerMethodField('check_redactor')
-    check_points = CheckPointOutputSerializer(many=True)
+    check_points = CheckPointSerializer(many=True)
     comments = CommentSerializer(many=True)
     files = FileSerializer(many=True)
 
@@ -226,7 +223,7 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
     exec_id = serializers.ListField(default=[])
     exec_name = serializers.ListField(default=[])
     files = FileSerializer(many=True)
-    check_points = CheckPointOutputSerializer(many=True)
+    check_points = CheckPointSerializer(many=True)
 
     class Meta:
         model = Tasks

@@ -1,4 +1,3 @@
-import requests
 from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -11,9 +10,9 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer, ProjectListSerializer, CheckPointOutputSerializer)
+                          CheckPointUpdateSerializer, ProjectListSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
-from .services import add_new_user, add_new_responsible, get_or_create_isu_tasks, get_or_create_user, \
+from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
     check_request_user_is_board_owner
 
@@ -238,38 +237,6 @@ class ChangeFriendPermissionToBoardView(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ISUView(APIView):
-#     def post(self, request, pk):
-#         url = f"http://isuapi.admlr.lipetsk.ru/api/get-ambulance-messages"
-#         payload = {}
-#         headers = {}
-#         response = requests.request("GET", url, headers=headers, data=payload)
-#         content = dict(response.json())
-#         death_escalation = content['data']['death_escalation']
-#         ambulances = content['data']['ambulance']
-#         test_output = content['data']['test_output']
-#         board = Boards.objects.get(id=pk)
-#         tasks = []
-#         project_death, project_death_created = Project.objects.get_or_create(title='Смертность')
-#         project_ambulance, project_ambulance_created = Project.objects.get_or_create(title='Скорая')
-#         responsible = CustomUser.objects.get(first_name=board.owner.first_name, last_name=board.owner.last_name,
-#                                              father_name=board.owner.father_name, boards=board)
-#         responsible_full_name = f"{responsible.last_name} {responsible.first_name} {responsible.father_name}"
-#         if ambulances:
-#             get_or_create_isu_tasks(items=ambulances, board=board, responsible_full_name=responsible_full_name,
-#                                     tasks=tasks, project=project_ambulance, responsible=responsible)
-#         if death_escalation:
-#             get_or_create_isu_tasks(items=death_escalation, board=board, responsible_full_name=responsible_full_name,
-#                                     tasks=tasks, project=project_death, responsible=responsible)
-#         if test_output:
-#             get_or_create_isu_tasks(items=test_output, board=board, responsible_full_name=responsible_full_name,
-#                                     tasks=tasks, project=project_death, responsible=responsible)
-#         if tasks:
-#             return Response(TaskListSerializer(tasks, many=True).data, status=status.HTTP_201_CREATED)
-#         else:
-#             return Response({"message": "Задач не найдено!"}, status=status.HTTP_200_OK)
-
-
 class ChangeLogsTaskView(APIView):
     def get(self, request, pk):
         try:
@@ -286,7 +253,7 @@ class CheckPointView(APIView):
         if serializer.is_valid():
             checkpoint = CheckPoint.objects.create(date=serializer.validated_data['date'], text=serializer.data['text'],
                                                    task_id=pk)
-            return Response(CheckPointOutputSerializer(checkpoint).data, status=status.HTTP_201_CREATED)
+            return Response(CheckPointSerializer(checkpoint).data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -304,7 +271,7 @@ class CheckPointView(APIView):
                     if 'status' in request.data:
                         checkpoint.status = serializer.data['status']
                     checkpoint.save()
-                    return Response(CheckPointOutputSerializer(checkpoint).data, status=status.HTTP_200_OK)
+                    return Response(CheckPointSerializer(checkpoint).data, status=status.HTTP_200_OK)
                 except CheckPoint.DoesNotExist:
                     return Response({'message': 'Чек-поинта не существует!'}, status=status.HTTP_404_NOT_FOUND)
             else:

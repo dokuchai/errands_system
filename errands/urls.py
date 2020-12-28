@@ -3,9 +3,11 @@ from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateV
                     FriendView, DeleteExecutorView, BoardTasksActiveView, BoardsListView, ChangeLogsTaskView,
                     AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
                     CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, RevisionView)
+from .calendar import EventFeed
 
 urlpatterns = [
     path('boards/', BoardsListView.as_view()),
+    path('board/<int:pk>/ics/', EventFeed()),
     path('board/<int:pk>/', BoardRetrieveUpdateView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/active-tasks/', BoardTasksActiveView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/create-task/', TaskCreateView.as_view()),

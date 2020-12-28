@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
+    'django_ical',
     'drf_yasg',
     'rest_registration',
     'changelog.apps.ChangelogConfig',
@@ -47,8 +48,7 @@ ROOT_URLCONF = 'errands_system.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
-        ,
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

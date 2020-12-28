@@ -16,6 +16,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('profile/', ProfileUserView.as_view()),
     path('', include('errands.urls')),
-    path('__debug__/', include(debug_toolbar.urls)),
+    # path('__debug__/', include(debug_toolbar.urls)),
 ]
 urlpatterns += swagger_urls

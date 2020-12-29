@@ -33,4 +33,10 @@ class ChangeLogSerializer(serializers.ModelSerializer):
             if board:
                 board = str(data['board']).lstrip('<Boards: ').rstrip('>')
                 data.update({'board': board})
+        if 'so_executors' in data:
+            so_executors = data['so_executors']
+            if so_executors:
+                so_executors = [
+                    {'full_name': str(so_executor).lstrip('<CustomUser: ').rstrip('>')} for so_executor in so_executors]
+            data.update({'so_executors': so_executors})
         return data

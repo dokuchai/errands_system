@@ -17,6 +17,7 @@ def journal_save_handler(sender, instance, created, **kwargs):
                 ChangeLog.add(instance, loggedIn.current_user, loggedIn.address, ACTION_CREATE, changed,
                               id=last_saved['id'])
             else:
+                # print(hasattr(loggedIn.current_user, 'is_authenticated'))
                 ChangeLog.add(instance, loggedIn.current_user, loggedIn.address, ACTION_UPDATE, changed,
                               id=last_saved['id'])
 

@@ -14,7 +14,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
-    check_request_user_is_board_owner, get_revision_tasks
+    check_request_user_is_board_owner, get_revision_tasks, tasks_report
 
 
 class IconsListView(ListAPIView):
@@ -358,3 +358,7 @@ class FileDelete(APIView):
 class RevisionView(APIView):
     def post(self, request, pk):
         return Response(TaskListSerializer(get_revision_tasks(request, pk), many=True).data, status=status.HTTP_200_OK)
+
+
+def get_tasks_report(request, pk):
+    return tasks_report(pk)

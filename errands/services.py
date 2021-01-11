@@ -1,4 +1,8 @@
 import requests
+import xlwt
+from django.http import HttpResponse
+from django.db.models import Value
+from django.db.models.functions import Concat
 from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
 from rest_framework.response import Response
@@ -190,3 +194,33 @@ def get_revision_tasks(request, pk):
         task.save()
         revision_tasks.append(task)
     return revision_tasks
+
+
+def tasks_report(pk):
+    response = HttpResponse(content_type='application/ms-excel')
+    response['Content-Disposition'] = 'attachment; filename="Task report.xls"'
+
+    wb = xlwt.Workbook(encoding='utf-8')
+    ws = wb.add_sheet('Tasks on 2 selected statuses')
+
+    row_num = 0
+
+    font_style = xlwt.XFStyle()
+    font_style.font.bold = True
+
+    columns = ['Ответственный', 'Задача', 'Статус']
+
+    for col_num in range(len(columns)):
+        ws.write(row_num, col_num, columns[col_num], font_style)
+
+    font_style = xlwt.XFStyle()
+    board = Boards.objects.get(id=pk)
+    rows = Tasks.objects.filter(board=board, status__in=('Требуется помощь', 'Завершено и подтверждено')).annotate(
+        responsible_name=Concat('responsible__first_name', Value(' '), 'responsible__last_name')).values_list(
+        'responsible_name', 'title', 'status')
+    for row in rows:
+        row_num += 1
+        for col_num in range(len(row)):
+            ws.write(row_num, col_num, row[col_num], font_style)
+    wb.save(response)
+    return response

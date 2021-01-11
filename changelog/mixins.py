@@ -1,5 +1,4 @@
 from django.db import models
-from django.db.models.options import make_immutable_fields_list
 
 
 class ChangeloggableMixin(models.Model):
@@ -16,10 +15,6 @@ class ChangeloggableMixin(models.Model):
             field.name: getattr(self, field.name)
             for field in self._meta.fields if field.name not in ['added', 'changed'] and hasattr(self, field.name)
         }
-        # self._original_values.update({
-        #     field.name: getattr(self, field.name)
-        #     for field in self._meta.many_to_many if hasattr(self, field.name)
-        # })
         # self._state.fields_cache.update({
         #     field.name: getattr(self, field.name).all()
         #     for field in self._meta.many_to_many if hasattr(self, field.name)
@@ -33,12 +28,17 @@ class ChangeloggableMixin(models.Model):
         """
         Получаем измененные данные
         """
+        self._original_values.update({
+            field.name: getattr(self, field.name)
+            for field in self._meta.many_to_many if hasattr(self, field.name)
+        })
         result = {}
-        print(self.__dict__.keys())
+        # print(self._original_values['so_executors'].all())
+        # print(self.__dict__.keys())
         for name, value in self._original_values.items():
             # print(name, value, value != getattr(self, name))
             if value != getattr(self, name):
-                print(value, getattr(self, name))
+                # print(value, getattr(self, name))
                 temp = {}
                 temp[name] = getattr(self, name)
                 result.update(temp)

@@ -23,7 +23,7 @@ class FriendBoardPermission(ChangeloggableMixin, models.Model):
 # post_delete.connect(journal_delete_handler, sender=FriendBoardPermission)
 
 
-class Boards(ChangeloggableMixin, models.Model):
+class Boards(models.Model):
     STATUS = (('Личная', 'Личная'), ('Для друзей', 'Для друзей'), ('Общая', 'Общая'))
     title = models.CharField('Название', max_length=250)
     status = models.CharField('Статус', max_length=10, choices=STATUS, default='Общая')

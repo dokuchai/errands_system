@@ -5,10 +5,15 @@ from .models import ChangeLog
 class ChangeLogSerializer(serializers.ModelSerializer):
     data = serializers.SerializerMethodField('get_readable_data')
     action = serializers.CharField(source='action_on_model')
+    user = serializers.SerializerMethodField('get_user_full_name')
 
     class Meta:
         model = ChangeLog
         fields = ('id', 'changed', 'user', 'action', 'data')
+
+    @staticmethod
+    def get_user_full_name(obj):
+        return f'{obj.user}'
 
     @staticmethod
     def get_readable_data(obj):

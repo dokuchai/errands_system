@@ -56,13 +56,9 @@ class ChangeloggableMixin(models.Model):
         # result.update(
         #     {'so_executors': [so_executor for so_executor in self._original_values.get('so_executors').all() if
         #                       'so_executors' in self._original_values.keys()]})
-        # if getattr(self, 'so_executors').all():
-        #     # print(self._original_values.items())
-        #     # print(self._original_values.get('so_executors').all())
-        #     # print(getattr(self, 'so_executors').all())
-        #     temp = {}
-        #     so_executors = [so_executor for so_executor in getattr(self, 'so_executors').all()]
-        #     temp['so_executors'] = so_executors
-        #     result.update(temp)
-        # print(result.get('so_executors'))
+        if getattr(self, 'so_executors').all():
+            temp = {}
+            so_executors = [so_executor for so_executor in getattr(self, 'so_executors').all()]
+            temp['so_executors'] = so_executors
+            result.update(temp)
         return result

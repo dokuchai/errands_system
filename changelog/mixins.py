@@ -33,32 +33,19 @@ class ChangeloggableMixin(models.Model):
             for field in self._meta.many_to_many if hasattr(self, field.name)
         })
         result = {}
-        # print(self._original_values['so_executors'].all())
-        # print(self.__dict__.keys())
         for name, value in self._original_values.items():
-            # print(name, value, value != getattr(self, name))
             if value != getattr(self, name):
-                # print(value, getattr(self, name))
                 temp = {}
                 temp[name] = getattr(self, name)
                 result.update(temp)
-            # if hasattr(value, 'all') and value.all() != getattr(self, name).all():
-            # print(dir(self._meta.local_many_to_many[0]))
-            # print(value.set.__self__.values('email'))
-            # print(value.all())
-            # print(getattr(self, name).all())
-            # print([_ for _ in value.all()] != [_ for _ in getattr(self, name).all()])
-            # print([obj for obj in value.all()])
-            # print(value.all(), getattr(self, 'so_executors').all())
-            # print(value.all != getattr(self, 'so_executors').all)
+            if hasattr(value, 'all') and list(value.all()) != list(getattr(self, name).all()):
+                temp = {}
+                so_executors = [so_executor for so_executor in getattr(self, name).all()]
+                temp[name] = so_executors
+                result.update(temp)
         # result.update({name: getattr(self, name) for name, value in self._original_values.items() if
         #                value != getattr(self, name)})
         # result.update(
         #     {'so_executors': [so_executor for so_executor in self._original_values.get('so_executors').all() if
         #                       'so_executors' in self._original_values.keys()]})
-        if getattr(self, 'so_executors').all():
-            temp = {}
-            so_executors = [so_executor for so_executor in getattr(self, 'so_executors').all()]
-            temp['so_executors'] = so_executors
-            result.update(temp)
         return result

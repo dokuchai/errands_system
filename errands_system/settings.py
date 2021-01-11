@@ -38,8 +38,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'changelog.middleware.LoggedInUserMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'changelog.middleware.LoggedInUserMiddleware',
     # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 

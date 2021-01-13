@@ -376,8 +376,8 @@ class TasksListView(APIView):
 
 class IncreaseVersionTaskView(APIView):
     def post(self, request, pk):
-        min_version = Tasks.objects.aggregate(min_version=Min('version'))
         task = Tasks.objects.get(id=pk)
+        min_version = Tasks.objects.filter(board=task.board).aggregate(min_version=Min('version'))
         if (task.version - min_version['min_version']) >= 1:
             raise CustomAPIException({'message': 'Сначала проведите ревизию остальных задач с предыдущей версией!'},
                                      status_code=status.HTTP_400_BAD_REQUEST)

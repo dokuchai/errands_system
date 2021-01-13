@@ -2,14 +2,16 @@ from django.urls import path
 from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView, IconsListView, BoardFriendsView,
                     FriendView, DeleteExecutorView, BoardTasksActiveView, BoardsListView, ChangeLogsTaskView,
                     AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
-                    CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, RevisionView, get_tasks_report)
+                    CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, RevisionView, get_tasks_report,
+                    VersionsTasksBoardView)
 from .calendar import EventFeed
 
 urlpatterns = [
     path('boards/', BoardsListView.as_view()),
+    path('board/<int:pk>/', BoardRetrieveUpdateView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/ics/', EventFeed()),
     path('board/<int:pk>/report/', get_tasks_report, name='tasks_report'),
-    path('board/<int:pk>/', BoardRetrieveUpdateView.as_view({"get": "retrieve", "put": "update"})),
+    path('board/<int:pk>/versions/', VersionsTasksBoardView.as_view()),
     path('board/<int:pk>/active-tasks/', BoardTasksActiveView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/create-task/', TaskCreateView.as_view()),
     path('board/<int:pk>/projects/', ActiveBoardProjects.as_view()),

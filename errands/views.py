@@ -362,3 +362,10 @@ class RevisionView(APIView):
 
 def get_tasks_report(request, pk):
     return tasks_report(pk)
+
+
+class VersionsTasksBoardView(APIView):
+    def get(self, request, pk):
+        versions = Tasks.objects.filter(board_id=pk).values('version')
+        versions = list({version['version'] for version in versions})
+        return Response({'versions': sorted(versions)}, status.HTTP_200_OK)

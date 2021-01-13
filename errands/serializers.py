@@ -106,7 +106,7 @@ class TaskListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'resp_id',
-                  'so_executors')
+                  'so_executors', 'version')
 
     def get_icon_url(self, obj):
         if obj.icon:
@@ -140,7 +140,8 @@ class TaskListWithoutProjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tasks
         fields = (
-            'id', 'title', 'status', 'term', 'responsible', 'icon', 'icon_url', 'board', 'resp_id', 'so_executors')
+            'id', 'title', 'status', 'term', 'responsible', 'icon', 'icon_url', 'board', 'resp_id', 'so_executors',
+            'version')
 
     def get_icon_url(self, obj):
         if obj.icon:
@@ -175,7 +176,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tasks
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
-                  'so_executors', 'redactor', 'check_points', 'comments', 'files')
+                  'so_executors', 'redactor', 'check_points', 'comments', 'files', 'version')
 
     def get_responsible_name(self, obj):
         if obj.responsible:

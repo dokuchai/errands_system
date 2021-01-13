@@ -185,15 +185,18 @@ def check_user_redactor(self, instance):
         return False
 
 
-def get_revision_tasks(request, pk):
-    tasks_array = request.data.get('tasks')
-    tasks = [Tasks.objects.get(board_id=pk, id=task_id['id']) for task_id in tasks_array]
-    revision_tasks = []
-    for task in tasks:
-        task.version += 1
-        task.save()
-        revision_tasks.append(task)
-    return revision_tasks
+def increase_version_task(pk):
+    task = Tasks.objects.get(id=pk)
+    task.version += 1
+    task.save()
+    return task
+
+
+def decrease_version_task(pk):
+    task = Tasks.objects.get(id=pk)
+    task.version -= 1
+    task.save()
+    return task
 
 
 def tasks_report(pk):

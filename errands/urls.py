@@ -2,14 +2,15 @@ from django.urls import path
 from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateView, IconsListView, BoardFriendsView,
                     FriendView, DeleteExecutorView, BoardTasksActiveView, BoardsListView, ChangeLogsTaskView,
                     AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
-                    CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, RevisionView, get_tasks_report,
-                    VersionsTasksBoardView)
+                    CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, IncreaseVersionTaskView,
+                    DecreaseVersionTaskView, get_tasks_report, VersionsTasksBoardView, TasksListView)
 from .calendar import EventFeed
 
 urlpatterns = [
     path('boards/', BoardsListView.as_view()),
     path('board/<int:pk>/', BoardRetrieveUpdateView.as_view({"get": "retrieve", "put": "update"})),
     path('board/<int:pk>/ics/', EventFeed()),
+    path('board/<int:pk>/tasks/', TasksListView.as_view()),
     path('board/<int:pk>/report/', get_tasks_report, name='tasks_report'),
     path('board/<int:pk>/versions/', VersionsTasksBoardView.as_view()),
     path('board/<int:pk>/active-tasks/', BoardTasksActiveView.as_view({"get": "retrieve", "put": "update"})),
@@ -20,9 +21,10 @@ urlpatterns = [
     path('board/<int:pk>/add-friend/', AddFriendToBoardView.as_view()),
     path('board/<int:pk>/friend-permission/', ChangeFriendPermissionToBoardView.as_view()),
     path('board/<int:pk>/delete-friend/', DeleteFriendToBoardView.as_view()),
-    path('board/<int:pk>/revision/', RevisionView.as_view()),
     path('task/<int:pk>/', TaskRetrieveUpdateView.as_view({"get": "retrieve", "put": "partial_update"})),
     path('task/<int:pk>/delete-executor/', DeleteExecutorView.as_view()),
+    path('task/<int:pk>/increase/', IncreaseVersionTaskView.as_view()),
+    path('task/<int:pk>/decrease/', DecreaseVersionTaskView.as_view()),
     path('task/<int:pk>/changelogs/', ChangeLogsTaskView.as_view()),
     path('task/<int:pk>/checkpoint/', CheckPointView.as_view()),
     path('task/<int:pk>/clear-checkpoints/', ClearCheckPointsView.as_view()),

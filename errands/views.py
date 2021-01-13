@@ -1,3 +1,4 @@
+from django.db.models import Min
 from rest_framework import viewsets, status
 from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -14,7 +15,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
-    check_request_user_is_board_owner, get_revision_tasks, tasks_report
+    check_request_user_is_board_owner, increase_version_task, decrease_version_task, tasks_report, CustomAPIException
 
 
 class IconsListView(ListAPIView):
@@ -355,11 +356,6 @@ class FileDelete(APIView):
                             status=status.HTTP_400_BAD_REQUEST)
 
 
-class RevisionView(APIView):
-    def post(self, request, pk):
-        return Response(TaskListSerializer(get_revision_tasks(request, pk), many=True).data, status=status.HTTP_200_OK)
-
-
 def get_tasks_report(request, pk):
     return tasks_report(pk)
 
@@ -369,3 +365,31 @@ class VersionsTasksBoardView(APIView):
         versions = Tasks.objects.filter(board_id=pk).values('version')
         versions = list({version['version'] for version in versions})
         return Response({'versions': sorted(versions)}, status.HTTP_200_OK)
+
+
+class TasksListView(APIView):
+    def get(self, request, pk):
+        board = Boards.objects.get(id=pk)
+        tasks = Tasks.objects.filter(board=board)
+        return Response(TaskListSerializer(tasks, many=True).data, status.HTTP_200_OK)
+
+
+class IncreaseVersionTaskView(APIView):
+    def post(self, request, pk):
+        min_version = Tasks.objects.aggregate(min_version=Min('version'))
+        task = Tasks.objects.get(id=pk)
+        if (task.version - min_version['min_version']) >= 1:
+            raise CustomAPIException({'message': 'Сначала проведите ревизию остальных задач с предыдущей версией!'},
+                                     status_code=status.HTTP_400_BAD_REQUEST)
+        return Response(TaskDetailSerializer(increase_version_task(pk), context={'user': request.user}).data,
+                        status=status.HTTP_200_OK)
+
+
+class DecreaseVersionTaskView(APIView):
+    def post(self, request, pk):
+        task = Tasks.objects.get(id=pk)
+        if task.version < 2:
+            raise CustomAPIException({'message': 'Значение версии имеет минимальное значение!'},
+                                     status_code=status.HTTP_400_BAD_REQUEST)
+        return Response(TaskDetailSerializer(decrease_version_task(pk), context={'user': request.user}).data,
+                        status=status.HTTP_200_OK)

@@ -11,7 +11,8 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer, ProjectListSerializer, TaskListSerializer)
+                          CheckPointUpdateSerializer, ProjectListSerializer, TaskListSerializer,
+                          BoardActiveTasksRevisionSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
@@ -55,6 +56,14 @@ class BoardTasksActiveView(BoardRetrieveUpdateView):
         context = super(BoardTasksActiveView, self).get_serializer_context()
         context.update({'user': self.request.user})
         return context
+
+
+class BoardTasksActiveRevisionView(BoardTasksActiveView):
+    def get_serializer_class(self):
+        if self.action == "retrieve":
+            return BoardActiveTasksRevisionSerializer
+        elif self.action == "update":
+            return BoardSerializer
 
 
 class TaskRetrieveUpdateView(viewsets.ModelViewSet):

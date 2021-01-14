@@ -137,10 +137,15 @@ def check_user_to_relation_with_current_board_in_serializer(self, instance):
             {'message': 'Вы не являетесь участником доски и не можете просмотреть содержимое!'})
 
 
-def check_request_user_is_board_owner(self):
-    board = Boards.objects.get(id=self.kwargs['pk'])
-    if board.owner != self.request.user:
-        raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})
+def check_request_user_is_board_owner(self, pk=None):
+    if pk is None:
+        board = Boards.objects.get(id=self.kwargs['pk'])
+        if board.owner != self.request.user:
+            raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})
+    else:
+        board = Boards.objects.get(id=pk)
+        if board.owner != self.context['user']:
+            raise CustomAPIException({'message': 'Это действие может выполнить только владелец доски'})
 
 
 def reset_user_password(user_id, password, timestamp, signature):

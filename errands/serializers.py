@@ -6,7 +6,7 @@ from rest_framework import serializers
 from users.models import CustomUser
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_responsible, add_new_user, check_user_to_relation_with_current_board_in_serializer, \
-    hide_request_to_isu, check_user_redactor
+    hide_request_to_isu, check_user_redactor, check_request_user_is_board_owner
 
 
 class IconSerializer(serializers.ModelSerializer):
@@ -364,6 +364,24 @@ class BoardActiveTasksSerializer(serializers.BaseSerializer, ABC):
         projects = Project.objects.filter(project_tasks__board=instance,
                                           project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         hide_request_to_isu(instance)
+        tasks = Tasks.objects.filter(board=instance, project=None,
+                                     status__in=('В работе', 'Требуется помощь')).order_by(
+            F('term').asc(nulls_last=True), 'id')
+        return {
+            "id": instance.id,
+            "title": instance.title,
+            "status": instance.status,
+            "owner": instance.owner.get_full_name(),
+            "projects": ProjectsWithActiveTasksSerializer(projects, many=True, context={'board': instance.id}).data,
+            "tasks": TaskListWithoutProjectSerializer(tasks, many=True).data
+        }
+
+
+class BoardActiveTasksRevisionSerializer(serializers.BaseSerializer, ABC):
+    def to_representation(self, instance):
+        check_request_user_is_board_owner(self, pk=instance.id)
+        projects = Project.objects.filter(project_tasks__board=instance,
+                                          project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
         tasks = Tasks.objects.filter(board=instance, project=None,
                                      status__in=('В работе', 'Требуется помощь')).order_by(
             F('term').asc(nulls_last=True), 'id')

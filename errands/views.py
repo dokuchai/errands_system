@@ -1,6 +1,6 @@
 from django.db.models import Min
 from rest_framework import viewsets, status
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveAPIView, ListCreateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -24,9 +24,12 @@ class IconsListView(ListAPIView):
     serializer_class = IconSerializer
 
 
-class BoardsListView(ListAPIView):
+class BoardsListView(ListCreateAPIView):
     queryset = Boards.objects.all()
     serializer_class = BoardSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(owner_id=self.request.user.id)
 
 
 class BoardRetrieveUpdateView(viewsets.ModelViewSet):

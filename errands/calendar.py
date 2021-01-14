@@ -23,7 +23,8 @@ class EventFeed(ICalFeed):
                                     responsible=self.request.user).order_by(
             '-term')
 
-    def item_guid(self, item):
+    @staticmethod
+    def item_guid(item):
         return f"{item.id}{'global_name'}"
 
     def item_title(self, item):
@@ -32,10 +33,12 @@ class EventFeed(ICalFeed):
     def item_description(self, item):
         return item.text
 
-    def item_start_datetime(self, item):
+    @staticmethod
+    def item_start_datetime():
         return datetime.now(pytz.utc)
 
-    def item_end_datetime(self, item):
+    @staticmethod
+    def item_end_datetime(item):
         return item.term
 
     def item_link(self, item):

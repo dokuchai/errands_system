@@ -29,6 +29,8 @@ class BoardsListView(ListCreateAPIView):
     serializer_class = BoardSerializer
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
         serializer.save(owner_id=self.request.user.id)
 
 

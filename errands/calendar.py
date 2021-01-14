@@ -19,7 +19,8 @@ class EventFeed(ICalFeed):
         return super(EventFeed, self).__call__(request, *args, **kwargs)
 
     def items(self):
-        return Tasks.objects.filter(board_id=self.board_id, status__in=('В работе', 'Требуется помощь')).order_by(
+        return Tasks.objects.filter(board_id=self.board_id, status__in=('В работе', 'Требуется помощь'),
+                                    responsible=self.request.user).order_by(
             '-term')
 
     def item_guid(self, item):

@@ -37,7 +37,7 @@ class CheckPointUpdateSerializer(CheckPointSerializer):
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text',)
+        fields = ('text', 'comments_file')
 
 
 class CommentSerializer(serializers.ModelSerializer):
@@ -45,7 +45,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Comment
-        fields = ('id', 'text', 'date', 'user')
+        fields = ('id', 'text', 'date', 'user', 'comments_file')
 
     def get_user_name(self, obj):
         return f'{obj.user.last_name} {obj.user.first_name}'

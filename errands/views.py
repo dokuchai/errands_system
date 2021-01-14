@@ -57,11 +57,6 @@ class BoardTasksActiveView(BoardRetrieveUpdateView):
         elif self.action == "update":
             return BoardSerializer
 
-    def get_serializer_context(self):
-        context = super(BoardTasksActiveView, self).get_serializer_context()
-        context.update({'user': self.request.user})
-        return context
-
 
 class BoardTasksActiveRevisionView(BoardTasksActiveView):
     def get_serializer_class(self):
@@ -315,6 +310,12 @@ class CommentsView(APIView):
             serializer = CommentCreateSerializer(data=request.data)
             if serializer.is_valid():
                 comment = Comment.objects.create(text=serializer.data['text'], task_id=pk, user=request.user)
+                if request.FILES:
+                    for file in request.FILES.getlist('comments_file'):
+                        file_obj = File.objects.create(file=file, comment=comment)
+                        file_name = str(file_obj).split('/')[-1]
+                        file_obj.name = file_name
+                        file_obj.save()
                 return Response(CommentSerializer(comment).data, status=status.HTTP_201_CREATED)
             else:
                 return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

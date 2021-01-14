@@ -139,6 +139,8 @@ class File(ChangeloggableMixin, models.Model):
     name = models.CharField('Имя', max_length=100, blank=True, null=True)
     file = models.FileField('Файл', upload_to='files/')
     task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='files')
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, verbose_name='Комментарий',
+                                related_name='comments_file', blank=True, null=True)
 
     class Meta:
         verbose_name = 'Файл'

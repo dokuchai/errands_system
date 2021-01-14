@@ -382,13 +382,6 @@ class VersionsTasksBoardView(APIView):
         return Response({'versions': sorted(versions)}, status.HTTP_200_OK)
 
 
-class TasksListView(APIView):
-    def get(self, request, pk):
-        board = Boards.objects.get(id=pk)
-        tasks = Tasks.objects.filter(board=board)
-        return Response(TaskListSerializer(tasks, many=True).data, status.HTTP_200_OK)
-
-
 class IncreaseVersionTaskView(APIView):
     def post(self, request, pk):
         task = Tasks.objects.get(id=pk)

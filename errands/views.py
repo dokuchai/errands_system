@@ -405,5 +405,9 @@ class DecreaseVersionTaskView(APIView):
 
 class GlobalSearchTasksView(APIView):
     def get(self, request):
-        tasks = Tasks.objects.filter(board__friends=request.user)
-        return Response(TaskListSerializer(tasks, many=True).data, status.HTTP_200_OK)
+        try:
+            tasks = Tasks.objects.filter(board__friends=request.user)
+            return Response(TaskListSerializer(tasks, many=True, context={'user': request.user}).data,
+                            status.HTTP_200_OK)
+        except TypeError:
+            raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)

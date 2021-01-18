@@ -401,3 +401,9 @@ class DecreaseVersionTaskView(APIView):
                                      status_code=status.HTTP_400_BAD_REQUEST)
         return Response(TaskDetailSerializer(decrease_version_task(pk), context={'user': request.user}).data,
                         status=status.HTTP_200_OK)
+
+
+class GlobalSearchTasksView(APIView):
+    def get(self, request):
+        tasks = Tasks.objects.filter(board__friends=request.user)
+        return Response(TaskListSerializer(tasks, many=True).data, status.HTTP_200_OK)

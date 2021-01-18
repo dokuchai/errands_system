@@ -37,7 +37,7 @@ class CheckPointUpdateSerializer(CheckPointSerializer):
 class CommentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
-        fields = ('text', 'comments_file')
+        fields = ('text',)
 
 
 class CommentSerializer(serializers.ModelSerializer):

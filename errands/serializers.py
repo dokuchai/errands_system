@@ -138,8 +138,7 @@ class TaskListSearchSerializer(TaskListSerializer):
     class Meta:
         model = Tasks
         fields = (
-            'id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'board_id',
-            'resp_id', 'version', 'user_status')
+            'id', 'title', 'project', 'board', 'board_id', 'user_status')
 
     def get_user_status(self, obj):
         friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])

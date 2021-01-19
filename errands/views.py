@@ -25,8 +25,13 @@ class IconsListView(ListAPIView):
 
 
 class BoardsListView(ListCreateAPIView):
-    queryset = Boards.objects.all()
     serializer_class = BoardSerializer
+
+    def get_queryset(self):
+        board_status = Boards.objects.filter(status='Общая')
+        board_owner = Boards.objects.filter(owner=self.request.user)
+        board_friend = Boards.objects.filter(friends=self.request.user)
+        return board_status.union(board_owner, board_friend)
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:

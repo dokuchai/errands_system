@@ -131,11 +131,15 @@ class TaskListSerializer(serializers.ModelSerializer):
 
 
 class TaskListSearchSerializer(TaskListSerializer):
+    board = serializers.CharField(source='board.title')
+    board_id = serializers.CharField(source='board.id')
     user_status = serializers.SerializerMethodField()
 
     class Meta:
         model = Tasks
-        fields = ('user_status',)
+        fields = (
+            'id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'board_id',
+            'resp_id', 'so_executors', 'version', 'user_status')
 
     def get_user_status(self, obj):
         friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])

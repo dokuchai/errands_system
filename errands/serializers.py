@@ -47,7 +47,8 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ('id', 'text', 'date', 'user', 'comments_file')
 
-    def get_user_name(self, obj):
+    @staticmethod
+    def get_user_name(obj):
         return f'{obj.user.last_name} {obj.user.first_name}'
 
 
@@ -58,7 +59,8 @@ class SoExecutorSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ('id', 'full_name')
 
-    def get_full_name(self, obj):
+    @staticmethod
+    def get_full_name(obj):
         return f'{obj.last_name} {obj.first_name}'
 
 
@@ -72,7 +74,8 @@ class BoardFriendSerializer(serializers.ModelSerializer):
         model = FriendBoardPermission
         fields = ('id', 'first_name', 'last_name', 'full_name', 'redactor')
 
-    def get_full_name(self, obj):
+    @staticmethod
+    def get_full_name(obj):
         return f'{obj.friend.last_name} {obj.friend.first_name}'
 
 
@@ -89,7 +92,8 @@ class TaskCreateSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'board', 'so_executors', 'files',
                   'check_points')
 
-    def get_icon_url(self, obj):
+    @staticmethod
+    def get_icon_url(obj):
         if obj.icon:
             return obj.icon.image.url
 
@@ -109,23 +113,28 @@ class TaskListSerializer(serializers.ModelSerializer):
             'id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'resp_id',
             'so_executors', 'version')
 
-    def get_icon_url(self, obj):
+    @staticmethod
+    def get_icon_url(obj):
         if obj.icon:
             return obj.icon.image.url
 
-    def get_icon_description(self, obj):
+    @staticmethod
+    def get_icon_description(obj):
         if obj.icon:
             return obj.icon.description
 
-    def get_responsible_name(self, obj):
+    @staticmethod
+    def get_responsible_name(obj):
         if obj.responsible:
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'
 
-    def get_resp_id(self, obj):
+    @staticmethod
+    def get_resp_id(obj):
         if obj.responsible:
             return obj.responsible.id
 
-    def get_project(self, obj):
+    @staticmethod
+    def get_project(obj):
         if obj.project:
             return obj.project.title
 
@@ -160,19 +169,23 @@ class TaskListWithoutProjectSerializer(serializers.ModelSerializer):
             'id', 'title', 'status', 'term', 'responsible', 'icon', 'icon_url', 'board', 'resp_id', 'so_executors',
             'version')
 
-    def get_icon_url(self, obj):
+    @staticmethod
+    def get_icon_url(obj):
         if obj.icon:
             return obj.icon.image.url
 
-    def get_icon_description(self, obj):
+    @staticmethod
+    def get_icon_description(obj):
         if obj.icon:
             return obj.icon.description
 
-    def get_responsible_name(self, obj):
+    @staticmethod
+    def get_responsible_name(obj):
         if obj.responsible:
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'
 
-    def get_resp_id(self, obj):
+    @staticmethod
+    def get_resp_id(obj):
         if obj.responsible:
             return obj.responsible.id
 
@@ -195,23 +208,28 @@ class TaskDetailSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status', 'resp_id',
                   'so_executors', 'redactor', 'check_points', 'comments', 'files', 'version')
 
-    def get_responsible_name(self, obj):
+    @staticmethod
+    def get_responsible_name(obj):
         if obj.responsible:
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'
 
-    def get_icon_description(self, obj):
+    @staticmethod
+    def get_icon_description(obj):
         if obj.icon:
             return obj.icon.description
 
-    def get_icon_image(self, obj):
+    @staticmethod
+    def get_icon_image(obj):
         if obj.icon:
             return obj.icon.image.url
 
-    def get_resp_id(self, obj):
+    @staticmethod
+    def get_resp_id(obj):
         if obj.responsible:
             return obj.responsible.id
 
-    def get_project(self, obj):
+    @staticmethod
+    def get_project(obj):
         if obj.project:
             return obj.project.title
 
@@ -249,7 +267,8 @@ class TaskUpdateSerializer(serializers.ModelSerializer):
             'id', 'title', 'text', 'project', 'term', 'responsible', 'icon', 'icon_url', 'status',
             'name', 'so_executors', 'resp_id', 'exec_id', 'exec_name', 'files', 'check_points')
 
-    def get_responsible_name(self, obj):
+    @staticmethod
+    def get_responsible_name(obj):
         if obj.responsible:
             return f'{obj.responsible.last_name} {obj.responsible.first_name}'.lstrip()
 

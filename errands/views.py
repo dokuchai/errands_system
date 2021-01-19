@@ -11,8 +11,8 @@ from changelog.serializers import ChangeLogSerializer
 from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerializer, CommentSerializer,
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
-                          CheckPointUpdateSerializer, ProjectListSerializer, TaskListSerializer,
-                          BoardActiveTasksRevisionSerializer, TaskListSearchSerializer)
+                          CheckPointUpdateSerializer, ProjectListSerializer, BoardActiveTasksRevisionSerializer,
+                          TaskListSearchSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
@@ -187,7 +187,8 @@ class FriendView(RetrieveAPIView):
 
 
 class DeleteExecutorView(APIView):
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         try:
             task, user = Tasks.objects.get(id=pk), CustomUser.objects.get(id=request.data.get('id'))
             if user in task.so_executors.all():
@@ -248,7 +249,8 @@ class ChangeFriendPermissionToBoardView(APIView):
 
 
 class ChangeLogsTaskView(APIView):
-    def get(self, request, pk):
+    @staticmethod
+    def get(request, pk):
         try:
             task = Tasks.objects.get(id=pk)
             changelogs = ChangeLog.objects.filter(record_id=task.id)
@@ -258,7 +260,8 @@ class ChangeLogsTaskView(APIView):
 
 
 class CheckPointView(APIView):
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         serializer = CheckPointSerializer(data=request.data)
         if serializer.is_valid():
             checkpoint = CheckPoint.objects.create(date=serializer.validated_data['date'], text=serializer.data['text'],
@@ -267,7 +270,8 @@ class CheckPointView(APIView):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk):
+    @staticmethod
+    def put(request, pk):
         user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
         if user_status:
             serializer = CheckPointUpdateSerializer(data=request.data)
@@ -289,7 +293,8 @@ class CheckPointView(APIView):
         else:
             return Response({'message': 'Вы не можете редактировать чек-лист!'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
+    @staticmethod
+    def delete(request, pk):
         if CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).exists():
             CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).delete()
             return Response({"message": "Чекпоинт удален!"}, status=status.HTTP_200_OK)
@@ -298,13 +303,15 @@ class CheckPointView(APIView):
 
 
 class ClearCheckPointsView(APIView):
-    def delete(self, request, pk):
+    @staticmethod
+    def delete(request, pk):
         CheckPoint.objects.filter(task_id=pk).delete()
         return Response({"message": "Очищено"}, status=status.HTTP_204_NO_CONTENT)
 
 
 class CommentsView(APIView):
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
         if user_status:
             serializer = CommentCreateSerializer(data=request.data)
@@ -322,7 +329,8 @@ class CommentsView(APIView):
         else:
             return Response({'message': 'Вы не можете добавить комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def put(self, request, pk):
+    @staticmethod
+    def put(request, pk):
         user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
         if user_status:
             serializer = CommentCreateSerializer(data=request.data)
@@ -343,7 +351,8 @@ class CommentsView(APIView):
         else:
             return Response({'message': 'Вы не можете редактировать комментарий!'}, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, pk):
+    @staticmethod
+    def delete(request, pk):
         user_status = check_request_user_to_relation_with_current_task(task_id=pk, request=request)
         if user_status:
             comment = Comment.objects.filter(id=request.data.get('id'), task_id=pk)
@@ -357,7 +366,8 @@ class CommentsView(APIView):
 
 
 class FileDelete(APIView):
-    def delete(self, request, pk):
+    @staticmethod
+    def delete(request, pk):
         user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
         if user_status:
             file = File.objects.filter(id=request.data.get('id'), task_id=pk)
@@ -376,14 +386,16 @@ def get_tasks_report(request, pk):
 
 
 class VersionsTasksBoardView(APIView):
-    def get(self, request, pk):
+    @staticmethod
+    def get(request, pk):
         versions = Tasks.objects.filter(board_id=pk).values('version')
         versions = list({version['version'] for version in versions})
         return Response({'versions': sorted(versions)}, status.HTTP_200_OK)
 
 
 class IncreaseVersionTaskView(APIView):
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         task = Tasks.objects.get(id=pk)
         min_version = Tasks.objects.filter(board=task.board).aggregate(min_version=Min('version'))
         if (task.version - min_version['min_version']) >= 1:
@@ -394,7 +406,8 @@ class IncreaseVersionTaskView(APIView):
 
 
 class DecreaseVersionTaskView(APIView):
-    def post(self, request, pk):
+    @staticmethod
+    def post(request, pk):
         task = Tasks.objects.get(id=pk)
         if task.version < 2:
             raise CustomAPIException({'message': 'Значение версии имеет минимальное значение!'},
@@ -404,7 +417,8 @@ class DecreaseVersionTaskView(APIView):
 
 
 class GlobalSearchTasksView(APIView):
-    def get(self, request):
+    @staticmethod
+    def get(request):
         try:
             tasks = Tasks.objects.filter(board__friends=request.user)
             return Response(TaskListSearchSerializer(tasks, many=True, context={'user': request.user}).data,

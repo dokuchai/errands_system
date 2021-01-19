@@ -12,7 +12,7 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
                           IconSerializer, TaskUpdateSerializer, BoardFriendSerializer, CommentCreateSerializer,
                           TaskCreateSerializer, BoardActiveTasksSerializer, CheckPointSerializer,
                           CheckPointUpdateSerializer, ProjectListSerializer, TaskListSerializer,
-                          BoardActiveTasksRevisionSerializer)
+                          BoardActiveTasksRevisionSerializer, TaskListSearchSerializer)
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
@@ -407,7 +407,7 @@ class GlobalSearchTasksView(APIView):
     def get(self, request):
         try:
             tasks = Tasks.objects.filter(board__friends=request.user)
-            return Response(TaskListSerializer(tasks, many=True, context={'user': request.user}).data,
+            return Response(TaskListSearchSerializer(tasks, many=True, context={'user': request.user}).data,
                             status.HTTP_200_OK)
         except TypeError:
             raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)

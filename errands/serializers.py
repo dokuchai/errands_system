@@ -102,15 +102,12 @@ class TaskListSerializer(serializers.ModelSerializer):
     resp_id = serializers.SerializerMethodField('get_resp_id')
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     project = serializers.SerializerMethodField('get_project')
-    user_status = serializers.SerializerMethodField('get_user_status')
-    board = serializers.CharField(source='board.title')
-    board_id = serializers.IntegerField(source='board.id')
 
     class Meta:
         model = Tasks
         fields = (
-            'id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'board_id',
-            'resp_id', 'so_executors', 'version', 'user_status')
+            'id', 'title', 'status', 'term', 'project', 'responsible', 'icon', 'icon_url', 'board', 'resp_id',
+            'so_executors', 'version')
 
     def get_icon_url(self, obj):
         if obj.icon:
@@ -131,6 +128,14 @@ class TaskListSerializer(serializers.ModelSerializer):
     def get_project(self, obj):
         if obj.project:
             return obj.project.title
+
+
+class TaskListSearchSerializer(TaskListSerializer):
+    user_status = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Tasks
+        fields = ('user_status',)
 
     def get_user_status(self, obj):
         friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])

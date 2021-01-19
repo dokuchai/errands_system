@@ -137,8 +137,7 @@ class TaskListSearchSerializer(TaskListSerializer):
 
     class Meta:
         model = Tasks
-        fields = (
-            'id', 'title', 'project', 'board', 'board_id', 'user_status')
+        fields = ('id', 'title', 'project', 'board', 'board_id', 'user_status')
 
     def get_user_status(self, obj):
         friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'])
@@ -217,7 +216,7 @@ class TaskDetailSerializer(serializers.ModelSerializer):
             return obj.project.title
 
     def check_redactor(self, obj):
-        if obj.board.owner == self.context['user']:
+        if obj.board.owner == self.context['user'] or obj.board.status == 'Общая':
             return True
         try:
             friend = FriendBoardPermission.objects.get(board_id=obj.board.id, friend_id=self.context['user'].id)

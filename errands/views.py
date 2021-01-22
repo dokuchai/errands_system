@@ -437,7 +437,7 @@ class SynchronizeView(APIView):
     @staticmethod
     def post(request, pk):
         board = Boards.objects.get(id=pk)
-        update = request.data.get('update')
+        update = request.data.get('editionTasks')
         for data in update:
             task_id = data.pop('id')
             try:

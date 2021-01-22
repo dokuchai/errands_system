@@ -16,7 +16,8 @@ from .serializers import (BoardSerializer, TaskDetailSerializer, BoardBaseSerial
 from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckPoint, Comment, File
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
-    check_request_user_is_board_owner, increase_version_task, decrease_version_task, tasks_report, CustomAPIException
+    check_request_user_is_board_owner, increase_version_task, decrease_version_task, tasks_report, CustomAPIException, \
+    update_task_logic
 
 
 class IconsListView(ListAPIView):
@@ -430,3 +431,18 @@ class GlobalSearchTasksView(APIView):
                             status.HTTP_200_OK)
         except TypeError:
             raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
+
+
+class SynchronizeView(APIView):
+    @staticmethod
+    def post(request, pk):
+        board = Boards.objects.get(id=pk)
+        update = request.data.get('update')
+        for data in update:
+            task_id = data.pop('id')
+            try:
+                task = Tasks.objects.get(board=board, id=task_id)
+                update_task_logic(instance=task, validated_data=data)
+            except Tasks.DoesNotExist:
+                pass
+        return Response({"message": "Синхронизация прошла успешно"}, status=status.HTTP_200_OK)

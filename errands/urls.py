@@ -4,7 +4,7 @@ from .views import (BoardRetrieveUpdateView, TaskRetrieveUpdateView, TaskCreateV
                     AddFriendToBoardView, DeleteFriendToBoardView, ChangeFriendPermissionToBoardView, CheckPointView,
                     CommentsView, FileDelete, ActiveBoardProjects, ClearCheckPointsView, IncreaseVersionTaskView,
                     DecreaseVersionTaskView, get_tasks_report, VersionsTasksBoardView, BoardTasksActiveRevisionView,
-                    GlobalSearchTasksView)
+                    GlobalSearchTasksView, SynchronizeView)
 from .calendar import EventFeed
 
 urlpatterns = [
@@ -22,6 +22,7 @@ urlpatterns = [
     path('board/<int:pk>/add-friend/', AddFriendToBoardView.as_view()),
     path('board/<int:pk>/friend-permission/', ChangeFriendPermissionToBoardView.as_view()),
     path('board/<int:pk>/delete-friend/', DeleteFriendToBoardView.as_view()),
+    path('board/<int:pk>/sync/', SynchronizeView.as_view()),
     path('task/search/', GlobalSearchTasksView.as_view()),
     path('task/<int:pk>/', TaskRetrieveUpdateView.as_view({"get": "retrieve", "put": "partial_update"})),
     path('task/<int:pk>/delete-executor/', DeleteExecutorView.as_view()),

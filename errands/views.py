@@ -17,7 +17,7 @@ from .models import Boards, Tasks, Icons, FriendBoardPermission, Project, CheckP
 from .services import add_new_user, add_new_responsible, get_or_create_user, \
     check_request_user_to_relation_with_current_task, check_user_to_relation_with_current_board, \
     check_request_user_is_board_owner, increase_version_task, decrease_version_task, tasks_report, CustomAPIException, \
-    update_task_logic
+    update_task_logic, create_task_logic
 
 
 class IconsListView(ListAPIView):
@@ -133,36 +133,7 @@ class TaskCreateView(CreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        icon, resp, project = None, None, None
-        executors = []
-        if 'icon' in self.request.data:
-            try:
-                icon = Icons.objects.get(description=self.request.data['icon'])
-            except Icons.DoesNotExist:
-                pass
-        if 'resp_name' in self.request.data and self.request.data['resp_name'] != '':
-            name = str(self.request.data['resp_name']).split(' ')
-            if len(name) == 1:
-                resp = add_new_responsible(first_name=name[1], last_name='', board_id=self.kwargs['pk'])
-            elif len(name) == 2:
-                resp = add_new_responsible(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk'])
-        if 'resp_id' in self.request.data:
-            resp = CustomUser.objects.get(id=self.request.data['resp_id'])
-        if 'exec_name' in self.request.data and self.request.data['exec_name']:
-            for executor in self.request.data['exec_name']:
-                name = executor.split(' ')
-                if len(name) == 1:
-                    executors.append(add_new_user(first_name=name[1], last_name='', board_id=self.kwargs['pk']))
-                elif len(name) == 2:
-                    executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=self.kwargs['pk']))
-        if 'exec_id' in self.request.data and self.request.data['exec_id']:
-            for executor in self.request.data['exec_id']:
-                executors.append(CustomUser.objects.get(id=executor))
-        if 'project' in self.request.data:
-            if self.request.data['project'] != '':
-                project, created = Project.objects.get_or_create(title=self.request.data['project'])
-        serializer.save(board_id=self.kwargs['pk'], icon=icon, so_executors=executors, responsible=resp,
-                        project=project)
+        create_task_logic(self.request.data, serializer, self.kwargs['pk'])
 
 
 class BoardFriendsView(ListAPIView):
@@ -445,4 +416,9 @@ class SynchronizeView(APIView):
                 update_task_logic(instance=task, validated_data=data)
             except Tasks.DoesNotExist:
                 pass
+        create = request.data.get('creationTasks')
+        for data in create:
+            serializer = TaskCreateSerializer(data=data)
+            if serializer.is_valid():
+                create_task_logic(data, serializer, board.id)
         return Response({"message": "Синхронизация прошла успешно"}, status=status.HTTP_200_OK)

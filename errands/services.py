@@ -1,7 +1,7 @@
 import requests
 import xlwt
 from django.http import HttpResponse
-from django.db.models import Value
+from django.db.models import Value, F
 from django.db.models.functions import Concat
 from django.utils.crypto import get_random_string
 from rest_framework import exceptions, status
@@ -234,6 +234,22 @@ def tasks_report(pk):
     return response
 
 
+def output_active_tasks(instance, project_serializer, task_serializer):
+    projects = Project.objects.filter(project_tasks__board=instance,
+                                      project_tasks__status__in=('В работе', 'Требуется помощь')).distinct()
+    tasks = Tasks.objects.filter(board=instance, project=None,
+                                 status__in=('В работе', 'Требуется помощь')).order_by(
+        F('term').asc(nulls_last=True), 'id')
+    return {
+        "id": instance.id,
+        "title": instance.title,
+        "status": instance.status,
+        "owner": instance.owner.get_full_name(),
+        "projects": project_serializer(projects, many=True, context={'board': instance.id}).data,
+        "tasks": task_serializer(tasks, many=True).data
+    }
+
+
 def update_task_logic(instance, validated_data):
     instance.title = validated_data.get('title', instance.title)
     instance.text = validated_data.get('text', instance.text)
@@ -291,3 +307,36 @@ def update_task_logic(instance, validated_data):
             executors.append(CustomUser.objects.get(id=executor))
     instance.so_executors.add(*executors)
     instance.save()
+
+
+def create_task_logic(data, serializer, board_id):
+    icon, resp, project = None, None, None
+    executors = []
+    if 'icon' in data:
+        try:
+            icon = Icons.objects.get(description=data['icon'])
+        except Icons.DoesNotExist:
+            pass
+    if 'resp_name' in data and data['resp_name'] != '':
+        name = str(data['resp_name']).split(' ')
+        if len(name) == 1:
+            resp = add_new_responsible(first_name=name[1], last_name='', board_id=board_id)
+        elif len(name) == 2:
+            resp = add_new_responsible(first_name=name[1], last_name=name[0], board_id=board_id)
+    if 'resp_id' in data:
+        resp = CustomUser.objects.get(id=data['resp_id'])
+    if 'exec_name' in data and data['exec_name']:
+        for executor in data['exec_name']:
+            name = executor.split(' ')
+            if len(name) == 1:
+                executors.append(add_new_user(first_name=name[1], last_name='', board_id=board_id))
+            elif len(name) == 2:
+                executors.append(add_new_user(first_name=name[1], last_name=name[0], board_id=board_id))
+    if 'exec_id' in data and data['exec_id']:
+        for executor in data['exec_id']:
+            executors.append(CustomUser.objects.get(id=executor))
+    if 'project' in data:
+        if data['project'] != '':
+            project, created = Project.objects.get_or_create(title=data['project'])
+    serializer.save(board_id=board_id, icon=icon, so_executors=executors, responsible=resp,
+                    project=project)

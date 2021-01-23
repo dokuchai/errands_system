@@ -411,7 +411,7 @@ class SynchronizeView(APIView):
         update = request.data.get('editionTasks')
         for data in update:
             task_id = data.pop('id')
-            if len(task_id) >= 10:
+            if len(str(task_id)) >= 10:
                 serializer = TaskCreateSerializer(data=data)
                 if serializer.is_valid():
                     create_task_logic(data, serializer, board.id)

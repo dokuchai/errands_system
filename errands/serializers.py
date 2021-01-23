@@ -80,7 +80,7 @@ class BoardFriendSerializer(serializers.ModelSerializer):
 
 
 class TaskCreateSerializer(serializers.ModelSerializer):
-    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False)
+    term = serializers.DateTimeField(input_formats=["%d-%m-%Y", "%Y-%m-%d", "%d.%m.%Y"], required=False, allow_null=True)
     icon = serializers.SerializerMethodField("get_icon_url")
     so_executors = SoExecutorSerializer(many=True, read_only=True)
     files = FileSerializer(many=True, read_only=True)

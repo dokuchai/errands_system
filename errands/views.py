@@ -411,16 +411,13 @@ class SynchronizeView(APIView):
         update = request.data.get('editionTasks')
         for data in update:
             task_id = data.pop('id')
-            if len(str(task_id)) >= 10:
+            try:
+                task = Tasks.objects.get(board=board, id=task_id)
+                update_task_logic(instance=task, validated_data=data)
+            except Tasks.DoesNotExist:
                 serializer = TaskCreateSerializer(data=data)
                 if serializer.is_valid():
                     create_task_logic(data, serializer, board.id)
-            else:
-                try:
-                    task = Tasks.objects.get(board=board, id=task_id)
-                    update_task_logic(instance=task, validated_data=data)
-                except Tasks.DoesNotExist:
-                    pass
         create = request.data.get('creationTasks')
         for data in create:
             serializer = TaskCreateSerializer(data=data)

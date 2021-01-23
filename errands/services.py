@@ -261,7 +261,7 @@ def update_task_logic(instance, validated_data):
     except Icons.DoesNotExist:
         instance.icon = None
     except TypeError:
-        pass
+        instance.icon = Icons.objects.get(description=icon)
     if 'resp_id' in validated_data:
         if str(validated_data['resp_id']).isdigit():
             try:

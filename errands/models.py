@@ -8,7 +8,8 @@ from changelog.signals import journal_save_handler, journal_delete_handler
 
 class FriendBoardPermission(ChangeloggableMixin, models.Model):
     board = models.ForeignKey('Boards', on_delete=models.CASCADE)
-    friend = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Друг')
+    friend = models.ForeignKey(
+        CustomUser, on_delete=models.CASCADE, verbose_name='Друг')
     redactor = models.BooleanField('Право на редактирование', default=False)
 
     class Meta:
@@ -24,11 +25,14 @@ class FriendBoardPermission(ChangeloggableMixin, models.Model):
 
 
 class Boards(models.Model):
-    STATUS = (('Личная', 'Личная'), ('Для друзей', 'Для друзей'), ('Общая', 'Общая'))
+    STATUS = (('Личная', 'Личная'), ('Для друзей',
+                                     'Для друзей'), ('Общая', 'Общая'))
     title = models.CharField('Название', max_length=250)
-    status = models.CharField('Статус', max_length=10, choices=STATUS, default='Общая')
+    status = models.CharField('Статус', max_length=10,
+                              choices=STATUS, default='Общая')
     history = models.DateTimeField('История', auto_now_add=True)
-    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='boards', verbose_name='Владелец')
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE,
+                              related_name='boards', verbose_name='Владелец')
     friends = models.ManyToManyField(CustomUser, verbose_name='Друзья доски', related_name='friend_board', blank=True,
                                      through=FriendBoardPermission)
 
@@ -82,7 +86,8 @@ class Tasks(ChangeloggableMixin, models.Model):
     title = models.TextField('Название')
     text = models.TextField('Текст задачи', blank=True, default='')
     term = models.DateTimeField('Срок', auto_now=False, blank=True, null=True)
-    status = models.CharField('Статус', max_length=25, choices=STATUS, default='В работе')
+    status = models.CharField('Статус', max_length=25,
+                              choices=STATUS, default='В работе')
     project = models.ForeignKey(Project, on_delete=models.PROTECT, blank=True, null=True, verbose_name='Проект',
                                 related_name='project_tasks')
     board = models.ForeignKey(Boards, on_delete=models.CASCADE, related_name='tasks', verbose_name='Доска', blank=True,
@@ -114,7 +119,8 @@ class CheckPoint(ChangeloggableMixin, models.Model):
     date = models.DateTimeField('Дата', auto_now=False)
     text = models.TextField('Текст', blank=True, null=True)
     status = models.BooleanField('Статус', default=False)
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='check_points')
+    task = models.ForeignKey(Tasks, on_delete=models.CASCADE,
+                             verbose_name='Задача', related_name='check_points')
 
     class Meta:
         verbose_name = 'Чекпоинт'
@@ -126,7 +132,8 @@ class Comment(ChangeloggableMixin, models.Model):
     text = models.TextField('Текст')
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Пользователь',
                              related_name='user_comments')
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='comments')
+    task = models.ForeignKey(
+        Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='comments')
     parent = models.ForeignKey('self', on_delete=models.CASCADE, verbose_name='Родительский комментарий',
                                related_name='replies', blank=True, null=True)
 
@@ -138,7 +145,8 @@ class Comment(ChangeloggableMixin, models.Model):
 class File(ChangeloggableMixin, models.Model):
     name = models.CharField('Имя', max_length=100, blank=True, null=True)
     file = models.FileField('Файл', upload_to='files/')
-    task = models.ForeignKey(Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='files')
+    task = models.ForeignKey(
+        Tasks, on_delete=models.CASCADE, verbose_name='Задача', related_name='files')
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE, verbose_name='Комментарий',
                                 related_name='comments_file', blank=True, null=True)
 

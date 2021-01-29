@@ -36,7 +36,8 @@ class BoardsListView(ListCreateAPIView):
 
     def perform_create(self, serializer):
         if not self.request.user.is_authenticated:
-            raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
+            raise CustomAPIException(
+                {'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
         serializer.save(owner_id=self.request.user.id)
 
 
@@ -90,7 +91,8 @@ class TaskRetrieveUpdateView(viewsets.ModelViewSet):
                                           task_id=self.kwargs['pk'])
         if self.request.FILES:
             for file in self.request.FILES.getlist('files'):
-                file_obj = File.objects.create(file=file, task_id=self.kwargs['pk'])
+                file_obj = File.objects.create(
+                    file=file, task_id=self.kwargs['pk'])
                 file_name = str(file_obj).split('/')[-1]
                 file_obj.name = file_name
                 file_obj.save()
@@ -150,7 +152,8 @@ class ActiveBoardProjects(ListAPIView):
 
     def get_queryset(self):
         check_user_to_relation_with_current_board(self)
-        projects = Project.objects.filter(project_tasks__board_id=self.kwargs['pk']).distinct()
+        projects = Project.objects.filter(
+            project_tasks__board_id=self.kwargs['pk']).distinct()
         return projects
 
 
@@ -167,7 +170,8 @@ class DeleteExecutorView(APIView):
     @staticmethod
     def post(request, pk):
         try:
-            task, user = Tasks.objects.get(id=pk), CustomUser.objects.get(id=request.data.get('id'))
+            task, user = Tasks.objects.get(
+                id=pk), CustomUser.objects.get(id=request.data.get('id'))
             if user in task.so_executors.all():
                 task.so_executors.remove(user)
                 return Response({"message": "Соисполнитель удален!"}, status=status.HTTP_200_OK)
@@ -185,7 +189,8 @@ class DeleteFriendToBoardView(APIView):
         check_user_to_relation_with_current_board(self)
         try:
             if FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).exists():
-                FriendBoardPermission.objects.filter(board_id=pk, friend_id=request.data.get('id')).delete()
+                FriendBoardPermission.objects.filter(
+                    board_id=pk, friend_id=request.data.get('id')).delete()
                 return Response({"message": "Друг удален!"}, status=status.HTTP_200_OK)
             else:
                 return Response({"message": "Пользователь не является другом данной доски!"},
@@ -201,12 +206,16 @@ class AddFriendToBoardView(APIView):
         check_user_to_relation_with_current_board(self)
         name, user = str(request.data['name']).split(' '), None
         if len(name) == 1:
-            user = get_or_create_user(last_name=name[0], first_name='', father_name='')
+            user = get_or_create_user(
+                last_name=name[0], first_name='', father_name='')
         elif len(name) == 2:
-            user = get_or_create_user(last_name=name[0], first_name=name[1], father_name='')
+            user = get_or_create_user(
+                last_name=name[0], first_name=name[1], father_name='')
         elif len(name) == 3:
-            user = get_or_create_user(last_name=name[0], first_name=name[1], father_name=name[2])
-        friend, created = FriendBoardPermission.objects.get_or_create(board_id=pk, friend_id=user.id)
+            user = get_or_create_user(
+                last_name=name[0], first_name=name[1], father_name=name[2])
+        friend, created = FriendBoardPermission.objects.get_or_create(
+            board_id=pk, friend_id=user.id)
         return Response(BoardFriendSerializer(friend).data, status=status.HTTP_200_OK)
 
 
@@ -214,7 +223,8 @@ class ChangeFriendPermissionToBoardView(APIView):
     def post(self, request, pk):
         check_request_user_is_board_owner(self)
         try:
-            friend = FriendBoardPermission.objects.get(board_id=pk, friend_id=request.data['id'])
+            friend = FriendBoardPermission.objects.get(
+                board_id=pk, friend_id=request.data['id'])
             friend.redactor = request.data['redactor']
             friend.save()
             return Response(BoardFriendSerializer(friend).data, status=status.HTTP_200_OK)
@@ -249,12 +259,14 @@ class CheckPointView(APIView):
 
     @staticmethod
     def put(request, pk):
-        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        user_status = check_request_user_to_relation_with_current_task(
+            request=request, task_id=pk)
         if user_status:
             serializer = CheckPointUpdateSerializer(data=request.data)
             if serializer.is_valid():
                 try:
-                    checkpoint = CheckPoint.objects.get(id=request.data['id'], task_id=pk)
+                    checkpoint = CheckPoint.objects.get(
+                        id=request.data['id'], task_id=pk)
                     if 'date' in request.data:
                         checkpoint.date = serializer.validated_data['date']
                     if 'text' in request.data:
@@ -273,7 +285,8 @@ class CheckPointView(APIView):
     @staticmethod
     def delete(request, pk):
         if CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).exists():
-            CheckPoint.objects.filter(id=request.data.get('id'), task_id=pk).delete()
+            CheckPoint.objects.filter(
+                id=request.data.get('id'), task_id=pk).delete()
             return Response({"message": "Чекпоинт удален!"}, status=status.HTTP_200_OK)
         else:
             return Response({"message": "Чекпоинта не существует!"}, status=status.HTTP_400_BAD_REQUEST)
@@ -289,14 +302,17 @@ class ClearCheckPointsView(APIView):
 class CommentsView(APIView):
     @staticmethod
     def post(request, pk):
-        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        user_status = check_request_user_to_relation_with_current_task(
+            request=request, task_id=pk)
         if user_status:
             serializer = CommentCreateSerializer(data=request.data)
             if serializer.is_valid():
-                comment = Comment.objects.create(text=serializer.data['text'], task_id=pk, user=request.user)
+                comment = Comment.objects.create(
+                    text=serializer.data['text'], task_id=pk, user=request.user)
                 if request.FILES:
                     for file in request.FILES.getlist('comments_file'):
-                        file_obj = File.objects.create(file=file, comment=comment)
+                        file_obj = File.objects.create(
+                            file=file, comment=comment)
                         file_name = str(file_obj).split('/')[-1]
                         file_obj.name = file_name
                         file_obj.save()
@@ -308,12 +324,14 @@ class CommentsView(APIView):
 
     @staticmethod
     def put(request, pk):
-        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        user_status = check_request_user_to_relation_with_current_task(
+            request=request, task_id=pk)
         if user_status:
             serializer = CommentCreateSerializer(data=request.data)
             if serializer.is_valid():
                 try:
-                    comment = Comment.objects.get(id=request.data.get('id'), task_id=pk)
+                    comment = Comment.objects.get(
+                        id=request.data.get('id'), task_id=pk)
                     if comment.user == request.user:
                         comment.text = serializer.data['text']
                         comment.save()
@@ -330,9 +348,11 @@ class CommentsView(APIView):
 
     @staticmethod
     def delete(request, pk):
-        user_status = check_request_user_to_relation_with_current_task(task_id=pk, request=request)
+        user_status = check_request_user_to_relation_with_current_task(
+            task_id=pk, request=request)
         if user_status:
-            comment = Comment.objects.filter(id=request.data.get('id'), task_id=pk)
+            comment = Comment.objects.filter(
+                id=request.data.get('id'), task_id=pk)
             if comment:
                 comment.delete()
                 return Response({"message": "Комментарий удален!"}, status=status.HTTP_200_OK)
@@ -345,7 +365,8 @@ class CommentsView(APIView):
 class FileDelete(APIView):
     @staticmethod
     def delete(request, pk):
-        user_status = check_request_user_to_relation_with_current_task(request=request, task_id=pk)
+        user_status = check_request_user_to_relation_with_current_task(
+            request=request, task_id=pk)
         if user_status:
             file = File.objects.filter(id=request.data.get('id'), task_id=pk)
             if file:
@@ -374,7 +395,8 @@ class IncreaseVersionTaskView(APIView):
     @staticmethod
     def post(request, pk):
         task = Tasks.objects.get(id=pk)
-        min_version = Tasks.objects.filter(board=task.board).aggregate(min_version=Min('version'))
+        min_version = Tasks.objects.filter(
+            board=task.board).aggregate(min_version=Min('version'))
         if (task.version - min_version['min_version']) >= 1:
             raise CustomAPIException({'message': 'Сначала проведите ревизию остальных задач с предыдущей версией!'},
                                      status_code=status.HTTP_400_BAD_REQUEST)
@@ -401,7 +423,8 @@ class GlobalSearchTasksView(APIView):
             return Response(TaskListSearchSerializer(tasks, many=True, context={'user': request.user}).data,
                             status.HTTP_200_OK)
         except TypeError:
-            raise CustomAPIException({'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
+            raise CustomAPIException(
+                {'message': 'Авторизуйтесь в системе'}, status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 class SynchronizeView(APIView):

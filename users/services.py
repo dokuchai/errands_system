@@ -42,7 +42,7 @@ def user_partial_update(request, serializer):
 def custom_password_validate(request, serializer):
     user = CustomUser.objects.get(id=request.user.id)
     password, password_confirm = serializer.data['password'], serializer.data['password_confirm']
-    if len(password) < 8 and password != password_confirm:
+    if len(password) < 8:
         raise CustomAPIException({'detail': 'Пароль должен состоять из минимум 8 символов'},
                                  status_code=HTTP_400_BAD_REQUEST)
     user.set_password(password)

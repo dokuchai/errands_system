@@ -100,7 +100,7 @@ def test_fail_auth_user_invalid_user_data(api_client, register_user):
 
     register_user(first_name="Ivan", last_name="Ivanov", father_name="James",
                   email="admin@admin.com", password="Password")
-    
+
     response = api_client.post(
         "/signin/",
         {
@@ -108,9 +108,9 @@ def test_fail_auth_user_invalid_user_data(api_client, register_user):
             "password": "password"
         }
     )
-    
+
     assert response.status_code == 404
-    
+
 
 @pytest.mark.django_db
 def test_fail_send_mail_password_reset(api_client):
@@ -120,15 +120,15 @@ def test_fail_send_mail_password_reset(api_client):
             "email": "james@bond.com"
         }
     )
-    
+
     assert response.status_code == 404
-    
+
 
 @pytest.mark.django_db
 def test_success_password_refresh(api_client, add_token):
     token = add_token()
     api_client.force_authenticate(token=token, user=token.user)
-    
+
     response = api_client.post(
         "/password-refresh/",
         {
@@ -145,7 +145,7 @@ def test_success_password_refresh(api_client, add_token):
 def test_fail_password_refresh_password_dismatch(api_client, add_token):
     token = add_token()
     api_client.force_authenticate(token=token, user=token.user)
-    
+
     response = api_client.post(
         "/password-refresh/",
         {
@@ -153,7 +153,7 @@ def test_fail_password_refresh_password_dismatch(api_client, add_token):
             "password_confirm": "NewPassword12"
         }
     )
-    
+
     assert response.status_code == 400
     assert response.data["detail"] == "Пароли не совпадают!"
 
@@ -162,7 +162,7 @@ def test_fail_password_refresh_password_dismatch(api_client, add_token):
 def test_set_short_password_in_refresh_password_url(api_client, add_token):
     token = add_token()
     api_client.force_authenticate(token=token, user=token.user)
-    
+
     response = api_client.post(
         "/password-refresh/",
         {
@@ -170,7 +170,7 @@ def test_set_short_password_in_refresh_password_url(api_client, add_token):
             "password_confirm": "123"
         }
     )
-    
+
     assert response.status_code == 400
     assert response.data["detail"] == "Пароль должен состоять из минимум 8 символов"
 
@@ -186,6 +186,70 @@ def test_fail_password_reset(api_client):
             "password": "NewPassword"
         }
     )
-    
+
     assert response.status_code == 400
     assert response.data["detail"] == "Неверные данные"
+
+
+@pytest.mark.django_db
+def test_get_profile(api_client, add_token):
+    token = add_token()
+    api_client.force_authenticate(token=token, user=token.user)
+
+    response = api_client.get("/profile/")
+
+    assert response.status_code == 200
+    assert response.data["email"] == token.user.email
+
+
+@pytest.mark.django_db
+def test_success_update_user_profile(api_client, add_token):
+    token = add_token()
+    api_client.force_authenticate(token=token, user=token.user)
+
+    response = api_client.put(
+        "/profile/",
+        {
+            "email": "admin@admin.com",
+            "first_name": "Ivan",
+            "last_name": "Ivanov",
+            "father_name": "James",
+            "subdivision": "Administration",
+            "position": "Developer"
+        }
+    )
+
+    assert response.status_code == 200
+
+
+@pytest.mark.django_db
+def test_fail_update_user_profile_invalid_serializer(api_client, add_token):
+    token = add_token()
+    api_client.force_authenticate(token=token, user=token.user)
+
+    response = api_client.put(
+        "/profile/",
+        {
+            "email": "admin"
+        }
+    )
+
+    assert response.status_code == 400
+
+
+@pytest.mark.django_db
+def test_fail_update_user_profile_cause_email_exists(api_client, add_token, register_user):
+    token = add_token()
+    api_client.force_authenticate(token=token, user=token.user)
+    register_user(first_name="Ivan", last_name="Ivanov", father_name="James",
+                  email="admin@admin.com", password="Password")
+
+    response = api_client.put(
+        "/profile/",
+        {
+            "email": "admin@admin.com"
+        }
+    )
+    
+    assert response.status_code == 400
+    assert response.data["detail"] == "Данный email зарегистрирован на другого пользователя"

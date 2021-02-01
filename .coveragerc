@@ -1,6 +1,7 @@
 [run]
 omit =
   *apps.py,
+  *admin.py
   *settings.py,
   *urls.py,
   *wsgi.py,
@@ -8,4 +9,6 @@ omit =
   manage.py,
   *migrations/*,
   *tests/*,
+  *__init__.py
+  errands_system/yasg.py
 branch = True
